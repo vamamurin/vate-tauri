@@ -6,9 +6,21 @@ use std::path::PathBuf;
 
 // Hàm tìm đường dẫn ~/.local/share/vate/jobs.json
 fn get_file_path() -> PathBuf {
-    let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
-    let dir = PathBuf::from(home).join(".local/share/vate");
-    let _ = fs::create_dir_all(&dir); // Tự tạo thư mục nếu chưa có
+    let dir = if cfg!(target_os = "windows") {
+        // Chuẩn Windows: C:\Users\Ten_May\AppData\Roaming\vate
+        let appdata = std::env::var("APPDATA").unwrap_or_else(|_| ".".to_string());
+        PathBuf::from(appdata).join("vate")
+    } else if cfg!(target_os = "macos") {
+        // Chuẩn macOS: ~/Library/Application Support/vate
+        let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
+        PathBuf::from(home).join("Library/Application Support/vate")
+    } else {
+        // Chuẩn Linux (Arch của mày): ~/.local/share/vate
+        let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
+        PathBuf::from(home).join(".local/share/vate")
+    };
+
+    let _ = fs::create_dir_all(&dir); // Tự động tạo cây thư mục nếu chưa có
     dir.join("jobs.json")
 }
 
