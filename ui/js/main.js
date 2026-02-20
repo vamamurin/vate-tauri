@@ -1,12 +1,12 @@
 const { invoke } = window.__TAURI__.core;
 
 const COLORS = [
-  { hex: '#c084fc', name: 'Lavender' },
-  { hex: '#f472b6', name: 'Rose' },
-  { hex: '#67e8f9', name: 'Cyan' },
-  { hex: '#34d399', name: 'Emerald' },
-  { hex: '#fbbf24', name: 'Gold' },
-  { hex: '#f87171', name: 'Coral' },
+  { hex: '#c94f2a', name: 'Terracotta' },
+  { hex: '#2a7ac9', name: 'Cobalt' },
+  { hex: '#2ac97a', name: 'Emerald' },
+  { hex: '#c9a82a', name: 'Amber' },
+  { hex: '#9b5de5', name: 'Violet' },
+  { hex: '#e5635d', name: 'Coral' },
 ];
 
 const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
