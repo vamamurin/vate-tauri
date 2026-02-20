@@ -49,7 +49,7 @@ body::before {
   z-index: 0;
 }
 
-.app {
+/* .app {
   position: relative;
   z-index: 1;
   width: 100%;
@@ -62,6 +62,21 @@ body::before {
     0 0 0 1px rgba(255,255,255,0.03),
     0 32px 80px rgba(0,0,0,0.6),
     0 0 120px rgba(192,132,252,0.08);
+  animation: fadeIn 0.5s ease;
+} */
+.app {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: calc(100vh - 40px); 
+  max-width: none;            
+  display: flex;
+  flex-direction: column;     
+  background: var(--surface);
+  border: 1px solid var(--glass-border);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 32px 80px rgba(0,0,0,0.6), 0 0 120px rgba(192,132,252,0.08);
   animation: fadeIn 0.5s ease;
 }
 
@@ -80,6 +95,13 @@ body::before {
   justify-content: space-between;
   gap: 16px;
   position: relative;
+  user-select: none;          
+  -webkit-app-region: drag;   
+}
+
+.header button, 
+.header .streak-badge {
+  -webkit-app-region: no-drag;
 }
 
 .header::after {
@@ -176,7 +198,11 @@ body::before {
 }
 
 /* LAYOUT */
-.layout { display: flex; }
+.layout { 
+  display: flex; 
+  flex: 1;
+  min-height: 0; 
+}
 
 .main-cal {
   flex: 1; min-width: 0;
@@ -506,7 +532,7 @@ body::before {
     
     <div class="month-nav">
       <button class="nav-btn" id="prevBtn">&#8592;</button>
-      <div class="month-title" id="monthTitle"></div>
+      <div class="month-title" id="monthTitle" data-tauri-drag-region></div>
       <button class="nav-btn" id="nextBtn">&#8594;</button>
     </div>
     
