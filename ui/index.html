@@ -70,10 +70,8 @@
 
             <!-- Side Panel -->
             <div class="side-panel">
-                <!-- Selected Day -->
                 <div>
                     <div class="panel-section-title">Selected Day</div>
-
                     <div class="selected-date-display">
                         <div class="sel-weekday" id="selWeekday">—</div>
                         <div class="sel-date" id="selDate">Pick a date</div>
@@ -82,10 +80,8 @@
 
                 <div class="divider"></div>
 
-                <!-- Events -->
-                <div>
+                <div class="events-wrapper">
                     <div class="panel-section-title">Events</div>
-
                     <div class="event-list" id="eventList">
                         <div class="no-events">No events for this day</div>
                     </div>
@@ -93,24 +89,19 @@
 
                 <div class="divider"></div>
 
-                <!-- Add Event -->
                 <div>
                     <div class="panel-section-title">Add Event</div>
-
                     <div class="add-form">
+                        <input type="text" id="eventName" placeholder="Event title..." />
                         <input
                             type="text"
-                            id="eventName"
-                            placeholder="Event title..."
+                            id="eventTime"
+                            placeholder="--:--:--"
+                            onfocus="this.type='time'"
+                            onblur="if(!this.value) this.type='text'"
                         />
-
-                        <input type="time" id="eventTime" />
-
                         <div class="color-row" id="colorRow"></div>
-
-                        <button class="add-btn" id="addBtn">
-                            ＋ Add to this day
-                        </button>
+                        <button class="add-btn" id="addBtn">＋ Add to this day</button>
                     </div>
                 </div>
             </div>
