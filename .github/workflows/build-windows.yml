@@ -32,7 +32,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Vate-Standalone-EXE
-          path: src-tauri/target/release/vate.exe
+          path: src-tauri/target/release/app.exe
           
       # Upload luôn file cài đặt (Setup)
       - name: Upload Setup Bundle
