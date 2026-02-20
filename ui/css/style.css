@@ -328,8 +328,18 @@ body::before {
   flex-shrink: 0;
   border-left: 1px solid var(--glass-border);
   padding: 24px 24px 28px;
-  display: flex; flex-direction: column; gap: 20px;
+  display: flex; 
+  flex-direction: column; 
+  gap: 20px;
   background: linear-gradient(180deg, rgba(192,132,252,0.03) 0%, transparent 100%);
+  min-height: 0;
+}
+
+.events-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .panel-section-title {
@@ -362,11 +372,16 @@ body::before {
 }
 
 .event-list {
-  display: flex; flex-direction: column; gap: 7px;
-  min-height: 60px; max-height: 200px;
+  display: flex; 
+  flex-direction: column; 
+  gap: 7px;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  
   scrollbar-width: thin;
   scrollbar-color: var(--ink-dim) transparent;
+  padding-right: 4px;
 }
 
 .no-events {
