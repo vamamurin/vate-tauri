@@ -136,8 +136,10 @@ function renderPanel(){
     </div>
   `).join('');
 
+  // XỬ LÝ CLICK ĐỂ MỞ MODAL
   list.querySelectorAll('.event-item').forEach(item => {
     item.addEventListener('click', (e) => {
+      // Nếu user bấm vào nút Xóa thì bỏ qua, không mở Modal
       if (e.target.closest('.del-btn')) return;
 
       const ki = item.dataset.k;
@@ -202,6 +204,7 @@ document.getElementById('addBtn').addEventListener('click', async ()=>{
   events[k].sort((a,b)=>a.time.localeCompare(b.time));
   document.getElementById('eventName').value='';
   document.getElementById('eventTime').value='';
+  document.getElementById('eventTime').type='text'; 
   
   await saveToDisk(); // LƯU VÀO ĐĨA
   
@@ -228,7 +231,7 @@ async function initApp() {
     console.error("Lỗi đọc file từ Rust, tạo lịch trống:", e);
     events = {};
   }
-
+  // Load xong mới bắt đầu render lên màn hình
   render();
   renderPanel();
 }
@@ -243,6 +246,7 @@ window.closeTaskModal = function() {
     document.getElementById('taskModal').classList.remove('active');
 }
 
+// Click ra ngoài khoảng đen để đóng modal nhanh
 document.getElementById('taskModal').addEventListener('click', function(e) {
     if (e.target === this) {
         closeTaskModal();
