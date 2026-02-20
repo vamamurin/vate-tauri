@@ -129,6 +129,17 @@ body::before {
   transform: scale(1.08);
 }
 
+.close-btn {
+  color: var(--ink-muted);
+}
+.close-btn:hover {
+  color: var(--red);
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(248, 113, 113, 0.1);
+  box-shadow: 0 0 20px rgba(248, 113, 113, 0.2);
+  transform: scale(1.08);
+}
+
 .header-right { display: flex; align-items: center; gap: 12px; }
 
 .today-btn {
@@ -489,18 +500,24 @@ body::before {
 <div class="app">
 
   <div class="header" data-tauri-drag-region>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <div>
       <button class="today-btn" id="todayBtn">Today</button>
-      <button class="nav-btn" style="color: red; font-weight: bold;" onclick="window.__TAURI__.window.getCurrentWindow().close()">X</button>
     </div>
+    
     <div class="month-nav">
       <button class="nav-btn" id="prevBtn">&#8592;</button>
       <div class="month-title" id="monthTitle"></div>
       <button class="nav-btn" id="nextBtn">&#8594;</button>
     </div>
+    
     <div class="header-right">
-      <button class="today-btn" id="todayBtn">Today</button>
       <div class="streak-badge">✦ <span id="streakCount">0</span> events</div>
+      <button class="nav-btn close-btn" id="closeBtn" title="Close App">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
   </div>
 
@@ -723,8 +740,12 @@ COLORS.forEach(c=>{
 });
 
 document.getElementById('legend').innerHTML = COLORS.slice(0,4).map(c=>
-  `<div class="legend-item"><div class="legend-dot" style="background:${c.hex};box-shadow:0 0 6px ${c.hex}"></div>${c.name}</div>`
+`<div class="legend-item"><div class="legend-dot" style="background:${c.hex};box-shadow:0 0 6px ${c.hex}"></div>${c.name}</div>`
 ).join('');
+
+document.getElementById('closeBtn').addEventListener('click', () => {
+  invoke('exit_app');
+});
 
 // 4. XỬ LÝ NÚT THÊM: Thêm xong gọi lưu ổ cứng
 document.getElementById('addBtn').addEventListener('click', async ()=>{
