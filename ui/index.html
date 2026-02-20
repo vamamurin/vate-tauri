@@ -1,823 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calendar</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --bg: #0e0c14;
-  --surface: #15121f;
-  --glass: rgba(255,255,255,0.04);
-  --glass-border: rgba(255,255,255,0.08);
-  --ink: #f0ecff;
-  --ink-muted: #7a708f;
-  --ink-dim: #3d3755;
-  --accent: #c084fc;
-  --accent2: #f472b6;
-  --accent3: #67e8f9;
-  --today-glow: rgba(244,114,182,0.4);
-  --gold: #fbbf24;
-  --green: #34d399;
-  --red: #f87171;
-}
-
-body {
-  font-family: 'Outfit', sans-serif;
-  background: var(--bg);
-  color: var(--ink);
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  overflow-x: hidden;
-}
-
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(192,132,252,0.12) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 60% at 80% 80%, rgba(244,114,182,0.10) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 40% at 60% 10%, rgba(103,232,249,0.07) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* .app {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 920px;
-  background: var(--surface);
-  border: 1px solid var(--glass-border);
-  border-radius: 28px;
-  overflow: hidden;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,0.03),
-    0 32px 80px rgba(0,0,0,0.6),
-    0 0 120px rgba(192,132,252,0.08);
-  animation: fadeIn 0.5s ease;
-} */
-.app {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  height: calc(100vh - 40px); 
-  max-width: none;            
-  display: flex;
-  flex-direction: column;     
-  background: var(--surface);
-  border: 1px solid var(--glass-border);
-  border-radius: 28px;
-  overflow: hidden;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 32px 80px rgba(0,0,0,0.6), 0 0 120px rgba(192,132,252,0.08);
-  animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(16px) scale(0.99); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* HEADER */
-.header {
-  padding: 32px 40px 28px;
-  border-bottom: 1px solid var(--glass-border);
-  background: linear-gradient(135deg, rgba(192,132,252,0.05) 0%, rgba(244,114,182,0.03) 100%);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  position: relative;
-  user-select: none;          
-  -webkit-app-region: drag;   
-}
-
-.header button, 
-.header .streak-badge {
-  -webkit-app-region: no-drag;
-}
-
-.header::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 40px; right: 40px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: 0.3;
-}
-
-.month-nav { display: flex; align-items: center; gap: 16px; }
-
-.month-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 2.6rem;
-  font-weight: 400;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  background: linear-gradient(135deg, #f0ecff 30%, #c084fc 70%, #f472b6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  min-width: 290px;
-}
-
-.month-title em { font-style: italic; }
-
-.nav-btn {
-  width: 42px; height: 42px;
-  border-radius: 14px;
-  border: 1px solid var(--glass-border);
-  background: var(--glass);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--ink-muted);
-  font-size: 1rem;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(8px);
-}
-
-.nav-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: rgba(192,132,252,0.1);
-  box-shadow: 0 0 20px rgba(192,132,252,0.2);
-  transform: scale(1.08);
-}
-
-.close-btn {
-  color: var(--ink-muted);
-}
-.close-btn:hover {
-  color: var(--red);
-  border-color: rgba(248, 113, 113, 0.3);
-  background: rgba(248, 113, 113, 0.1);
-  box-shadow: 0 0 20px rgba(248, 113, 113, 0.2);
-  transform: scale(1.08);
-}
-
-.header-right { display: flex; align-items: center; gap: 12px; }
-
-.today-btn {
-  padding: 9px 20px;
-  border-radius: 14px;
-  border: 1px solid var(--glass-border);
-  background: var(--glass);
-  cursor: pointer;
-  font-family: 'Outfit', sans-serif;
-  font-size: 0.82rem; font-weight: 500;
-  color: var(--ink-muted);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  transition: all 0.2s;
-  backdrop-filter: blur(8px);
-}
-
-.today-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: rgba(192,132,252,0.08);
-  box-shadow: 0 0 20px rgba(192,132,252,0.15);
-}
-
-.streak-badge {
-  display: flex; align-items: center; gap: 6px;
-  padding: 7px 14px;
-  border-radius: 30px;
-  background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(244,114,182,0.08));
-  border: 1px solid rgba(251,191,36,0.2);
-  font-size: 0.78rem; font-weight: 600;
-  color: var(--gold);
-  letter-spacing: 0.02em;
-}
-
-/* LAYOUT */
-.layout { 
-  display: flex; 
-  flex: 1;
-  min-height: 0; 
-}
-
-.main-cal {
-  flex: 1; min-width: 0;
-  padding: 24px 32px 32px;
-}
-
-/* DAY LABELS */
-.day-labels {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  margin-bottom: 10px;
-}
-
-.day-label {
-  text-align: center;
-  font-size: 0.68rem; font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-dim);
-  padding: 0 0 10px;
-}
-
-.day-label.we { color: rgba(192,132,252,0.5); }
-
-/* GRID */
-.days-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
-}
-
-.day-cell {
-  aspect-ratio: 1 / 1.02;
-  border-radius: 14px;
-  padding: 8px 7px 6px;
-  cursor: pointer;
-  position: relative;
-  display: flex; flex-direction: column; align-items: flex-start;
-  transition: all 0.18s ease;
-  border: 1px solid transparent;
-  overflow: hidden;
-}
-
-.day-cell::before {
-  content: '';
-  position: absolute; inset: 0;
-  border-radius: 14px;
-  background: var(--glass);
-  opacity: 0;
-  transition: opacity 0.18s;
-}
-
-.day-cell:hover:not(.empty):not(.other-month) {
-  border-color: rgba(192,132,252,0.25);
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3), 0 0 0 1px rgba(192,132,252,0.1);
-}
-
-.day-cell:hover:not(.empty):not(.other-month)::before { opacity: 1; }
-.day-cell.other-month { cursor: default; }
-.day-cell.other-month .day-num { color: var(--ink-dim); opacity: 0.4; }
-
-.day-cell.selected:not(.today) {
-  background: linear-gradient(135deg, rgba(192,132,252,0.15), rgba(244,114,182,0.08));
-  border-color: rgba(192,132,252,0.4);
-  box-shadow: 0 0 0 1px rgba(192,132,252,0.15), inset 0 1px 0 rgba(255,255,255,0.05);
-}
-
-.day-cell.selected:not(.today) .day-num { color: var(--accent); }
-
-.day-cell.today {
-  background: linear-gradient(135deg, rgba(244,114,182,0.18), rgba(192,132,252,0.12));
-  border-color: rgba(244,114,182,0.5);
-  box-shadow: 0 0 20px var(--today-glow), inset 0 1px 0 rgba(255,255,255,0.08);
-}
-
-.day-num {
-  font-size: 0.85rem; font-weight: 500;
-  line-height: 1; color: var(--ink);
-  z-index: 1; position: relative;
-  width: 26px; height: 26px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 8px; flex-shrink: 0;
-}
-
-.day-cell.today .day-num {
-  background: linear-gradient(135deg, #f472b6, #c084fc);
-  color: #fff; font-weight: 700;
-  box-shadow: 0 2px 12px rgba(244,114,182,0.5);
-}
-
-.day-cell.we-day:not(.other-month) .day-num { color: rgba(192,132,252,0.7); }
-.day-cell.today.we-day .day-num { color: #fff; }
-.day-cell.selected:not(.today).we-day .day-num { color: var(--accent); }
-
-.dots {
-  display: flex; gap: 3px;
-  margin-top: auto; padding-top: 4px;
-  position: relative; z-index: 1;
-  flex-wrap: wrap;
-}
-
-.dot {
-  width: 5px; height: 5px;
-  border-radius: 50%; flex-shrink: 0;
-  box-shadow: 0 0 6px currentColor;
-}
-
-.event-count {
-  position: absolute; top: 6px; right: 6px;
-  width: 16px; height: 16px;
-  border-radius: 50%;
-  background: var(--accent); color: #fff;
-  font-size: 0.6rem; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  opacity: 0; transform: scale(0.5);
-  transition: all 0.2s;
-}
-
-.day-cell:hover .event-count { opacity: 1; transform: scale(1); }
-
-/* SIDE PANEL */
-.side-panel {
-  width: 248px; flex-shrink: 0;
-  border-left: 1px solid var(--glass-border);
-  padding: 24px 24px 28px;
-  display: flex; flex-direction: column; gap: 20px;
-  background: linear-gradient(180deg, rgba(192,132,252,0.03) 0%, transparent 100%);
-}
-
-.panel-section-title {
-  font-size: 0.65rem; font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.14em;
-  color: var(--ink-dim); margin-bottom: 10px;
-}
-
-.selected-date-display {
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-}
-
-.sel-weekday {
-  font-size: 0.72rem; font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.1em;
-  color: var(--accent); margin-bottom: 2px;
-}
-
-.sel-date {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.4rem;
-  background: linear-gradient(135deg, #f0ecff, #c084fc);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1.2;
-}
-
-.event-list {
-  display: flex; flex-direction: column; gap: 7px;
-  min-height: 60px; max-height: 200px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--ink-dim) transparent;
-}
-
-.no-events {
-  font-size: 0.78rem; color: var(--ink-dim);
-  font-style: italic; padding: 6px 2px;
-}
-
-.event-item {
-  display: flex; align-items: center; gap: 9px;
-  padding: 9px 12px;
-  border-radius: 12px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  cursor: default;
-  transition: all 0.15s;
-  animation: slideUp 0.2s ease;
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.event-item:hover {
-  border-color: rgba(192,132,252,0.25);
-  background: rgba(192,132,252,0.06);
-}
-
-.event-color-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%; flex-shrink: 0;
-  box-shadow: 0 0 8px currentColor;
-}
-
-.event-info { flex: 1; min-width: 0; }
-.event-name { font-size: 0.78rem; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.event-time { font-size: 0.68rem; color: var(--ink-muted); margin-top: 1px; }
-
-.del-btn {
-  background: none; border: none;
-  color: var(--ink-dim); cursor: pointer;
-  font-size: 0.7rem; padding: 2px;
-  transition: color 0.15s; line-height: 1; flex-shrink: 0;
-}
-
-.del-btn:hover { color: var(--red); }
-
-.add-form { display: flex; flex-direction: column; gap: 8px; }
-
-.add-form input[type="text"],
-.add-form input[type="time"] {
-  width: 100%; padding: 9px 13px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  font-family: 'Outfit', sans-serif;
-  font-size: 0.8rem; color: var(--ink);
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  color-scheme: dark;
-}
-
-.add-form input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(192,132,252,0.12);
-}
-
-.add-form input::placeholder { color: var(--ink-dim); }
-
-.color-row { display: flex; gap: 7px; align-items: center; padding: 2px 0; }
-
-.cpick {
-  width: 22px; height: 22px;
-  border-radius: 50%; cursor: pointer;
-  border: 2px solid transparent;
-  transition: all 0.15s;
-  box-shadow: 0 0 8px rgba(0,0,0,0.4);
-}
-
-.cpick:hover { transform: scale(1.2); }
-.cpick.active { border-color: #fff; transform: scale(1.15); }
-
-.add-btn {
-  padding: 10px;
-  border-radius: 13px; border: none;
-  background: linear-gradient(135deg, #c084fc, #f472b6);
-  color: #fff;
-  font-family: 'Outfit', sans-serif;
-  font-size: 0.8rem; font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 16px rgba(192,132,252,0.3);
-  letter-spacing: 0.02em;
-}
-
-.add-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(192,132,252,0.45);
-}
-
-.add-btn:active { transform: translateY(0); }
-
-.divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
-}
-
-/* FOOTER */
-.footer {
-  border-top: 1px solid var(--glass-border);
-  padding: 16px 40px;
-  display: flex; align-items: center; justify-content: space-between;
-  background: rgba(0,0,0,0.15);
-}
-
-.legend { display: flex; gap: 16px; align-items: center; }
-
-.legend-item {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 0.72rem; color: var(--ink-muted);
-}
-
-.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
-
-.month-progress { display: flex; align-items: center; gap: 10px; }
-
-.progress-bar {
-  width: 100px; height: 4px;
-  background: var(--glass-border);
-  border-radius: 99px; overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #c084fc, #f472b6);
-  border-radius: 99px;
-  transition: width 0.5s ease;
-  box-shadow: 0 0 8px rgba(192,132,252,0.5);
-}
-
-.progress-label { font-size: 0.7rem; color: var(--ink-muted); }
-
-@media (max-width: 700px) {
-  .header { padding: 20px 20px 18px; flex-wrap: wrap; }
-  .month-title { font-size: 1.8rem; min-width: unset; }
-  .main-cal { padding: 16px 16px 20px; }
-  .layout { flex-direction: column; }
-  .side-panel { width: 100%; border-left: none; border-top: 1px solid var(--glass-border); }
-  .footer { padding: 12px 16px; flex-direction: column; gap: 10px; }
-  .streak-badge { display: none; }
-}
-</style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calendar</title>
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap"
+        rel="stylesheet"
+    />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body>
+    <div class="app">
+        <!-- Header -->
+        <div class="header" data-tauri-drag-region>
+            <div>
+                <button class="today-btn" id="todayBtn">Today</button>
+            </div>
 
-<div class="app">
+            <div class="month-nav">
+                <button class="nav-btn" id="prevBtn">&#8592;</button>
+                <div
+                    class="month-title"
+                    id="monthTitle"
+                    data-tauri-drag-region
+                ></div>
+                <button class="nav-btn" id="nextBtn">&#8594;</button>
+            </div>
 
-  <div class="header" data-tauri-drag-region>
-    <div>
-      <button class="today-btn" id="todayBtn">Today</button>
-    </div>
-    
-    <div class="month-nav">
-      <button class="nav-btn" id="prevBtn">&#8592;</button>
-      <div class="month-title" id="monthTitle" data-tauri-drag-region></div>
-      <button class="nav-btn" id="nextBtn">&#8594;</button>
-    </div>
-    
-    <div class="header-right">
-      <div class="streak-badge">✦ <span id="streakCount">0</span> events</div>
-      <button class="nav-btn close-btn" id="closeBtn" title="Close App">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-    </div>
-  </div>
+            <div class="header-right">
+                <div class="streak-badge">
+                    ✦ <span id="streakCount">0</span> events
+                </div>
 
-  <div class="layout">
-    <div class="main-cal">
-      <div class="day-labels" id="dayLabels"></div>
-      <div class="days-grid" id="daysGrid"></div>
-    </div>
-
-    <div class="side-panel">
-      <div>
-        <div class="panel-section-title">Selected Day</div>
-        <div class="selected-date-display">
-          <div class="sel-weekday" id="selWeekday">—</div>
-          <div class="sel-date" id="selDate">Pick a date</div>
+                <button
+                    class="nav-btn close-btn"
+                    id="closeBtn"
+                    title="Close App"
+                >
+                    <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
         </div>
-      </div>
-      <div class="divider"></div>
-      <div>
-        <div class="panel-section-title">Events</div>
-        <div class="event-list" id="eventList">
-          <div class="no-events">No events for this day</div>
+
+        <!-- Layout -->
+        <div class="layout">
+            <!-- Main Calendar -->
+            <div class="main-cal">
+                <div class="day-labels" id="dayLabels"></div>
+                <div class="days-grid" id="daysGrid"></div>
+            </div>
+
+            <!-- Side Panel -->
+            <div class="side-panel">
+                <!-- Selected Day -->
+                <div>
+                    <div class="panel-section-title">Selected Day</div>
+
+                    <div class="selected-date-display">
+                        <div class="sel-weekday" id="selWeekday">—</div>
+                        <div class="sel-date" id="selDate">Pick a date</div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Events -->
+                <div>
+                    <div class="panel-section-title">Events</div>
+
+                    <div class="event-list" id="eventList">
+                        <div class="no-events">No events for this day</div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Add Event -->
+                <div>
+                    <div class="panel-section-title">Add Event</div>
+
+                    <div class="add-form">
+                        <input
+                            type="text"
+                            id="eventName"
+                            placeholder="Event title..."
+                            maxlength="40"
+                        />
+
+                        <input type="time" id="eventTime" />
+
+                        <div class="color-row" id="colorRow"></div>
+
+                        <button class="add-btn" id="addBtn">
+                            ＋ Add to this day
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="divider"></div>
-      <div>
-        <div class="panel-section-title">Add Event</div>
-        <div class="add-form">
-          <input type="text" id="eventName" placeholder="Event title..." maxlength="40">
-          <input type="time" id="eventTime">
-          <div class="color-row" id="colorRow"></div>
-          <button class="add-btn" id="addBtn">＋ Add to this day</button>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="legend" id="legend"></div>
+
+            <div class="month-progress">
+                <div class="progress-bar">
+                    <div
+                        class="progress-fill"
+                        id="progressFill"
+                    ></div>
+                </div>
+
+                <span
+                    class="progress-label"
+                    id="progressLabel"
+                ></span>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 
-  <div class="footer">
-    <div class="legend" id="legend"></div>
-    <div class="month-progress">
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-      <span class="progress-label" id="progressLabel"></span>
-    </div>
-  </div>
-
-</div>
-
-<script>
-    // 1. Lấy API của Tauri
-const { invoke } = window.__TAURI__.core;
-
-const COLORS = [
-  { hex: '#c084fc', name: 'Lavender' },
-  { hex: '#f472b6', name: 'Rose' },
-  { hex: '#67e8f9', name: 'Cyan' },
-  { hex: '#34d399', name: 'Emerald' },
-  { hex: '#fbbf24', name: 'Gold' },
-  { hex: '#f87171', name: 'Coral' },
-];
-
-const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-const MONTHS = ['January','February','March','April','May','June',
-                'July','August','September','October','November','December'];
-
-let current  = new Date();
-let today    = new Date();
-let selected = { y: today.getFullYear(), m: today.getMonth(), d: today.getDate() };
-let events   = {};
-let chosenColor = COLORS[0].hex;
-
-function key(y,m,d){ return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
-
-// 2. Hàm lưu dữ liệu xuống ổ cứng qua Rust
-async function saveToDisk() {
-  try {
-    // Ép object events thành chuỗi JSON và gửi cho Rust
-    await invoke('save_jobs', { jobsJson: JSON.stringify(events) });
-  } catch (e) {
-    console.error("Lỗi lưu file:", e);
-  }
-}
-
-function render(){
-  const y = current.getFullYear(), m = current.getMonth();
-
-  document.getElementById('monthTitle').innerHTML = `<em>${MONTHS[m]}</em> ${y}`;
-
-  document.getElementById('dayLabels').innerHTML =
-    DAYS.map((d,i)=>`<div class="day-label${i===0||i===6?' we':''}">${d}</div>`).join('');
-
-  const firstDay    = new Date(y,m,1).getDay();
-  const daysInMonth = new Date(y,m+1,0).getDate();
-  const daysInPrev  = new Date(y,m,0).getDate();
-  const grid        = document.getElementById('daysGrid');
-  grid.innerHTML    = '';
-
-  let cells = [];
-  for(let i=firstDay-1;i>=0;i--) cells.push({day:daysInPrev-i, mo:m===0?11:m-1, yr:m===0?y-1:y, other:true});
-  for(let d=1;d<=daysInMonth;d++) cells.push({day:d, mo:m, yr:y, other:false});
-  while(cells.length<42){
-    let d=cells.length-firstDay-daysInMonth+1;
-    cells.push({day:d, mo:m===11?0:m+1, yr:m===11?y+1:y, other:true});
-  }
-
-  cells.forEach(c=>{
-    const div     = document.createElement('div');
-    const cellKey = key(c.yr, c.mo, c.day);
-    const isToday = !c.other && c.day===today.getDate() && c.mo===today.getMonth() && c.yr===today.getFullYear();
-    const isSel   = selected && key(selected.y,selected.m,selected.d)===cellKey;
-    const dow     = new Date(c.yr,c.mo,c.day).getDay();
-    const isWE    = dow===0||dow===6;
-    const evList  = events[cellKey]||[];
-
-    div.className = ['day-cell',
-      c.other?'other-month':'',
-      isToday?'today':'',
-      isSel?'selected':'',
-      isWE&&!c.other?'we-day':''
-    ].filter(Boolean).join(' ');
-
-    const num = document.createElement('div');
-    num.className   = 'day-num';
-    num.textContent = c.day;
-    div.appendChild(num);
-
-    if(evList.length){
-      const dots = document.createElement('div');
-      dots.className = 'dots';
-      evList.slice(0,5).forEach(e=>{
-        const dot = document.createElement('div');
-        dot.className = 'dot';
-        dot.style.cssText = `background:${e.color};color:${e.color}`;
-        dots.appendChild(dot);
-      });
-      div.appendChild(dots);
-
-      if(evList.length>1){
-        const badge = document.createElement('div');
-        badge.className   = 'event-count';
-        badge.textContent = evList.length;
-        div.appendChild(badge);
-      }
-    }
-
-    if(!c.other){
-      div.addEventListener('click',()=>{
-        selected = {y:c.yr, m:c.mo, d:c.day};
-        render(); renderPanel();
-      });
-    }
-
-    grid.appendChild(div);
-  });
-
-  const totalDays  = daysInMonth;
-  const currentDay = (y===today.getFullYear()&&m===today.getMonth()) ? today.getDate() : 0;
-  const pct        = Math.round((currentDay/totalDays)*100);
-  document.getElementById('progressFill').style.width  = pct+'%';
-  document.getElementById('progressLabel').textContent = pct ? `${pct}% through ${MONTHS[m]}` : MONTHS[m];
-
-  const totalEvs = Object.values(events).flat().length;
-  document.getElementById('streakCount').textContent = totalEvs;
-}
-
-function renderPanel(){
-  if(!selected) return;
-  const k    = key(selected.y, selected.m, selected.d);
-  const date = new Date(selected.y, selected.m, selected.d);
-
-  document.getElementById('selWeekday').textContent = date.toLocaleDateString('en-US',{weekday:'long'});
-  document.getElementById('selDate').textContent    = date.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-
-  const evList = events[k]||[];
-  const list   = document.getElementById('eventList');
-  if(!evList.length){ list.innerHTML='<div class="no-events">No events for this day</div>'; return; }
-
-  list.innerHTML = evList.map((e,i)=>`
-    <div class="event-item">
-      <div class="event-color-dot" style="background:${e.color};color:${e.color}"></div>
-      <div class="event-info">
-        <div class="event-name">${e.name}</div>
-        ${e.time?`<div class="event-time">${fmtTime(e.time)}</div>`:''}
-      </div>
-      <button class="del-btn" data-k="${k}" data-i="${i}">✕</button>
-    </div>
-  `).join('');
-
-  // 3. XỬ LÝ NÚT XÓA: Xóa xong gọi lưu ổ cứng
-  list.querySelectorAll('.del-btn').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      const ki=btn.dataset.k, ii=parseInt(btn.dataset.i);
-      events[ki].splice(ii,1);
-      if(!events[ki].length) delete events[ki];
-      
-      await saveToDisk(); // LƯU VÀO ĐĨA
-      
-      render(); renderPanel();
-    });
-  });
-}
-
-function fmtTime(t){
-  if(!t) return '';
-  const [h,m]=t.split(':'); const hr=parseInt(h);
-  return `${hr%12||12}:${m} ${hr<12?'AM':'PM'}`;
-}
-
-const colorRow = document.getElementById('colorRow');
-COLORS.forEach(c=>{
-  const btn = document.createElement('div');
-  btn.className = 'cpick'+(c.hex===chosenColor?' active':'');
-  btn.style.background = c.hex;
-  btn.title = c.name;
-  btn.addEventListener('click',()=>{
-    chosenColor = c.hex;
-    colorRow.querySelectorAll('.cpick').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-  });
-  colorRow.appendChild(btn);
-});
-
-document.getElementById('legend').innerHTML = COLORS.slice(0,4).map(c=>
-`<div class="legend-item"><div class="legend-dot" style="background:${c.hex};box-shadow:0 0 6px ${c.hex}"></div>${c.name}</div>`
-).join('');
-
-document.getElementById('closeBtn').addEventListener('click', () => {
-  invoke('exit_app');
-});
-
-// 4. XỬ LÝ NÚT THÊM: Thêm xong gọi lưu ổ cứng
-document.getElementById('addBtn').addEventListener('click', async ()=>{
-  if(!selected) return;
-  const name = document.getElementById('eventName').value.trim();
-  if(!name) return;
-  const time = document.getElementById('eventTime').value;
-  const k = key(selected.y, selected.m, selected.d);
-  if(!events[k]) events[k]=[];
-  events[k].push({name,time,color:chosenColor});
-  events[k].sort((a,b)=>a.time.localeCompare(b.time));
-  document.getElementById('eventName').value='';
-  document.getElementById('eventTime').value='';
-  
-  await saveToDisk(); // LƯU VÀO ĐĨA
-  
-  render(); renderPanel();
-});
-
-document.getElementById('eventName').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('addBtn').click(); });
-document.getElementById('prevBtn').addEventListener('click',()=>{ current.setMonth(current.getMonth()-1); render(); });
-document.getElementById('nextBtn').addEventListener('click',()=>{ current.setMonth(current.getMonth()+1); render(); });
-document.getElementById('todayBtn').addEventListener('click',()=>{
-  current = new Date();
-  selected = {y:today.getFullYear(),m:today.getMonth(),d:today.getDate()};
-  render(); renderPanel();
-});
-
-// 5. HÀM KHỞI ĐỘNG: Đọc ổ cứng trước khi vẽ
-async function initApp() {
-  try {
-    const data = await invoke('load_jobs');
-    if (data) {
-      events = JSON.parse(data);
-    }
-  } catch (e) {
-    console.error("Lỗi đọc file từ Rust, tạo lịch trống:", e);
-    events = {};
-  }
-  // Load xong mới bắt đầu render lên màn hình
-  render();
-  renderPanel();
-}
-
-// Chạy app
-initApp();
-</script>
+    <!-- Script -->
+    <script src="js/main.js"></script>
 </body>
 </html>
