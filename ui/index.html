@@ -4,14 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Calendar</title>
-
-    <!-- Fonts -->
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap"
         rel="stylesheet"
     />
-
-    <!-- Styles -->
     <link rel="stylesheet" href="css/style.css" />
 </head>
 
@@ -25,34 +21,25 @@
 
             <div class="month-nav">
                 <button class="nav-btn" id="prevBtn">&#8592;</button>
-                <div
-                    class="month-title"
-                    id="monthTitle"
-                    data-tauri-drag-region
-                ></div>
+                <div class="month-title" id="monthTitle" data-tauri-drag-region></div>
                 <button class="nav-btn" id="nextBtn">&#8594;</button>
             </div>
 
             <div class="header-right">
                 <div class="streak-badge">
-                    ✦ <span id="streakCount">0</span> events
+                    <span id="streakCount">0</span> <span data-i18n="events">events</span>
                 </div>
 
-                <button
-                    class="nav-btn close-btn"
-                    id="closeBtn"
-                    title="Close App"
-                >
-                    <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                    >
+                <!-- Settings button -->
+                <button class="nav-btn" id="settingsBtn" title="Settings">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </button>
+
+                <button class="nav-btn close-btn" id="closeBtn" title="Close App">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
@@ -71,28 +58,29 @@
             <!-- Side Panel -->
             <div class="side-panel">
                 <div>
-                    <div class="panel-section-title">Selected Day</div>
+                    <div class="panel-section-title" data-i18n="selectedDay">Selected Day</div>
                     <div class="selected-date-display">
                         <div class="sel-weekday" id="selWeekday">—</div>
-                        <div class="sel-date" id="selDate">Pick a date</div>
+                        <div class="sel-date" id="selDate" data-i18n-placeholder="pickDate">Pick a date</div>
+                        <div class="sel-lunar" id="selLunar"></div>
                     </div>
                 </div>
 
                 <div class="divider"></div>
 
                 <div class="events-wrapper">
-                    <div class="panel-section-title">Events</div>
+                    <div class="panel-section-title" data-i18n="events">Events</div>
                     <div class="event-list" id="eventList">
-                        <div class="no-events">No events for this day</div>
+                        <div class="no-events" data-i18n="noEvents">No events for this day</div>
                     </div>
                 </div>
 
                 <div class="divider"></div>
 
                 <div>
-                    <div class="panel-section-title">Add Event</div>
+                    <div class="panel-section-title" data-i18n="addEvent">Add Event</div>
                     <div class="add-form">
-                        <input type="text" id="eventName" placeholder="Event title..." />
+                        <input type="text" id="eventName" data-i18n-placeholder="eventTitle" placeholder="Event title..." />
                         <input
                             type="text"
                             id="eventTime"
@@ -101,7 +89,7 @@
                             onblur="if(!this.value) this.type='text'"
                         />
                         <div class="color-row" id="colorRow"></div>
-                        <button class="add-btn" id="addBtn">＋ Add to this day</button>
+                        <button class="add-btn" id="addBtn" data-i18n="addToDay">＋ Add to this day</button>
                     </div>
                 </div>
             </div>
@@ -110,44 +98,85 @@
         <!-- Footer -->
         <div class="footer">
             <div class="legend" id="legend"></div>
-
             <div class="month-progress">
                 <div class="progress-bar">
-                    <div
-                        class="progress-fill"
-                        id="progressFill"
-                    ></div>
+                    <div class="progress-fill" id="progressFill"></div>
                 </div>
-
-                <span
-                    class="progress-label"
-                    id="progressLabel"
-                ></span>
+                <span class="progress-label" id="progressLabel"></span>
             </div>
         </div>
     </div>
 
+    <!-- Task Detail Modal -->
     <div class="modal-overlay" id="taskModal">
-      <div class="modal-content">
-          <div class="modal-header">
-              <h3 class="modal-title">Task Details</h3>
-              <button class="nav-btn close-btn" onclick="closeTaskModal()" style="width: 32px; height: 32px;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-              </button>
-          </div>
-          <div class="modal-body">
-              <div class="modal-task-time" id="modalTime"></div>
-              <div class="modal-task-name" id="modalName"></div>
-          </div>
-      </div>
-  </div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" data-i18n="taskDetails">Task Details</h3>
+                <button class="nav-btn close-btn" onclick="closeTaskModal()" style="width:32px;height:32px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-task-time" id="modalTime"></div>
+                <div class="modal-task-name" id="modalName"></div>
+            </div>
+        </div>
+    </div>
 
-    <!-- Script -->
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-content modal-content--settings">
+            <div class="modal-header">
+                <h3 class="modal-title" data-i18n="settings">⚙ Settings</h3>
+                <button class="nav-btn close-btn" onclick="closeSettingsModal()" style="width:32px;height:32px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body settings-body">
+
+                <!-- Language -->
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <div class="setting-label-main" data-i18n="settingLanguage">Language</div>
+                        <div class="setting-label-sub" data-i18n="settingLanguageSub">Display language for the app</div>
+                    </div>
+                    <div class="setting-control">
+                        <div class="seg-control" id="langControl">
+                            <button class="seg-btn" data-val="en">English</button>
+                            <button class="seg-btn" data-val="vi">Tiếng Việt</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-divider"></div>
+
+                <!-- Lunar Calendar -->
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <div class="setting-label-main" data-i18n="settingLunar">Lunar Calendar</div>
+                        <div class="setting-label-sub" data-i18n="settingLunarSub">Show lunar dates on each cell</div>
+                    </div>
+                    <div class="setting-control">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="lunarToggle" />
+                            <span class="toggle-track">
+                                <span class="toggle-thumb"></span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="js/i18n.js"></script>
     <script src="js/main.js"></script>
-
-
 </body>
 </html>

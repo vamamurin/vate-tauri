@@ -571,6 +571,162 @@ body::before {
   word-break: break-word;
 }
 
+/* ── LUNAR DATE GROUP (Stacked Layout) ─────────────── */
+.date-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0px; /* Ép sát rạt vào nhau */
+  margin-bottom: 4px; 
+}
+
+.lunar-label {
+  /* Trả về đúng kích thước cũ của mày */
+  font-size: 0.56rem; 
+  font-weight: 500;
+  color: var(--ink-dim);
+  line-height: 1;
+  
+  /* Giữ layout xếp dọc, cách số trên 2px cho thoáng */
+  position: static;
+  margin-top: 2px;
+  pointer-events: none; 
+}
+
+.lunar-label.lunar-first {
+  color: var(--accent);
+  font-weight: 700;
+  /* Trả về đúng kích thước cũ của mày */
+  font-size: 0.55rem; 
+}
+
+/* When cell is selected (dark background), lighten lunar text */
+.day-cell.selected:not(.today) .lunar-label       { color: rgba(255,255,255,0.45); }
+.day-cell.selected:not(.today) .lunar-label.lunar-first { color: rgba(255,255,255,0.75); }
+
+/* ── SEL-LUNAR (selected date display) ─────────── */
+.sel-lunar {
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  margin-top: 4px;
+  font-style: italic;
+  display: none;
+}
+
+/* ── SETTINGS MODAL ─────────────────────────────── */
+.modal-content--settings {
+  max-width: 420px;
+}
+
+.settings-body {
+  gap: 0 !important;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+}
+
+.setting-divider {
+  height: 1px;
+  background: var(--border);
+}
+
+.setting-label-main {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+
+.setting-label-sub {
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+}
+
+/* Segmented control for language */
+.seg-control {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  gap: 0;
+}
+
+.seg-btn {
+  padding: 7px 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.seg-btn + .seg-btn {
+  border-left: 1px solid var(--border);
+}
+
+.seg-btn.active {
+  background: var(--ink);
+  color: #fff;
+}
+
+.seg-btn:hover:not(.active) {
+  background: var(--glass);
+  color: var(--ink);
+}
+
+/* Toggle switch */
+.toggle-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.toggle-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0; height: 0;
+}
+
+.toggle-track {
+  display: flex;
+  align-items: center;
+  width: 44px;
+  height: 24px;
+  border-radius: 99px;
+  background: var(--border);
+  border: 1px solid var(--glass-border);
+  transition: background 0.2s, border-color 0.2s;
+  padding: 2px;
+}
+
+.toggle-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(26,20,16,0.18);
+  transition: transform 0.2s ease;
+}
+
+.toggle-switch input:checked + .toggle-track {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.toggle-switch input:checked + .toggle-track .toggle-thumb {
+  transform: translateX(20px);
+}
+
 /* ── RESPONSIVE ─────────────────────────────────── */
 @media (max-width: 700px) {
   .header { padding: 18px 20px 16px; flex-wrap: wrap; }

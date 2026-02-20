@@ -1,0 +1,62 @@
+// ─────────────────────────────────────────────────────────────
+//  i18n DICTIONARY
+// ─────────────────────────────────────────────────────────────
+const I18N = {
+  en: {
+    days:        ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    daysLong:    ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    months:      ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'],
+    lunarMonths: ['1','2','3','4','5','6','7','8','9','10','11','12'],
+
+    // UI strings
+    events:           'events',
+    selectedDay:      'Selected Day',
+    pickDate:         'Pick a date',
+    noEvents:         'No events for this day',
+    addEvent:         'Add Event',
+    eventTitle:       'Event title...',
+    addToDay:         '＋ Add to this day',
+    allDay:           'All day',
+    taskDetails:      'Task Details',
+    settings:         '⚙ Settings',
+    settingLanguage:  'Language',
+    settingLanguageSub: 'Display language for the app',
+    settingLunar:     'Lunar Calendar',
+    settingLunarSub:  'Show lunar dates on each cell',
+    progressLabel:    (pct, month) => pct ? `${pct}% through ${month}` : month,
+    lunarDate: (d, m, ccDay, ccMonth, ccYear, numYear) => `${d}/${m}/${numYear}`,
+    lunarFirst: (m) => `1/${m}`,
+    lunarDay: (d) => `${d}`,
+  },
+
+  vi: {
+    days:        ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+    daysLong:    ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'],
+    months:      ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6',
+                  'Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'],
+    lunarMonths: ['1','2','3','4','5','6','7','8','9','10','11','12'],
+
+    events:           'sự kiện',
+    selectedDay:      'Ngày Đang Chọn',
+    pickDate:         'Chọn một ngày',
+    noEvents:         'Không có sự kiện',
+    addEvent:         'Thêm Sự Kiện',
+    eventTitle:       'Tên sự kiện...',
+    addToDay:         '＋ Thêm vào ngày này',
+    allDay:           'Cả ngày',
+    taskDetails:      'Chi Tiết Sự Kiện',
+    settings:         '⚙ Cài đặt',
+    settingLanguage:  'Ngôn ngữ',
+    settingLanguageSub: 'Ngôn ngữ hiển thị',
+    settingLunar:     'Âm Lịch',
+    settingLunarSub:  'Hiển thị ngày âm trên lịch',
+    progressLabel:    (pct, month) => pct ? `${pct}% của ${month}` : month,
+    // lunarDate:        (d, m, y) => `Âm lịch: ${d} tháng ${m} năm ${y}`,
+    // lunarFirst:       (m) => `1/Tháng ${m}`,
+    // lunarDay:         (d) => `${d}`,
+    lunarDate: (d, m, ccDay, ccMonth, ccYear, numYear) => `Ngày ${d} tháng ${m} (Âm lịch)<br><span style="display: block; font-size: 0.9em; opacity: 0.8; margin-top: 6px; line-height: 1.6;">Năm ${ccYear}<br>Tháng ${ccMonth}<br>Ngày ${ccDay}</span>`,
+    lunarFirst: (m) => `1/${m}`,
+    lunarDay: (d) => `${d}`,
+  },
+};
