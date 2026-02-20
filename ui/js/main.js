@@ -21,8 +21,10 @@ let chosenColor = COLORS[0].hex;
 
 function key(y,m,d){ return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
 
+// 2. Hàm lưu dữ liệu xuống ổ cứng qua Rust
 async function saveToDisk() {
   try {
+    // Ép object events thành chuỗi JSON và gửi cho Rust
     await invoke('save_jobs', { jobsJson: JSON.stringify(events) });
   } catch (e) {
     console.error("Lỗi lưu file:", e);
@@ -124,24 +126,36 @@ function renderPanel(){
   if(!evList.length){ list.innerHTML='<div class="no-events">No events for this day</div>'; return; }
 
   list.innerHTML = evList.map((e,i)=>`
-    <div class="event-item">
+    <div class="event-item" data-k="${k}" data-i="${i}">
       <div class="event-color-dot" style="background:${e.color};color:${e.color}"></div>
       <div class="event-info">
         <div class="event-name">${e.name}</div>
-        ${e.time?`<div class="event-time">${fmtTime(e.time)}</div>`:''}
+        <div class="event-time">${e.time ? fmtTime(e.time) : 'All day'}</div>
       </div>
       <button class="del-btn" data-k="${k}" data-i="${i}">✕</button>
     </div>
   `).join('');
 
+  list.querySelectorAll('.event-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      if (e.target.closest('.del-btn')) return;
 
+      const ki = item.dataset.k;
+      const ii = parseInt(item.dataset.i);
+      const ev = events[ki][ii];
+      
+      openTaskModal(ev.name, ev.time ? fmtTime(ev.time) : 'All day');
+    });
+  });
+
+  // 3. XỬ LÝ NÚT XÓA: Xóa xong gọi lưu ổ cứng
   list.querySelectorAll('.del-btn').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
       const ki=btn.dataset.k, ii=parseInt(btn.dataset.i);
       events[ki].splice(ii,1);
       if(!events[ki].length) delete events[ki];
       
-      await saveToDisk(); 
+      await saveToDisk(); // LƯU VÀO ĐĨA
       
       render(); renderPanel();
     });
@@ -176,7 +190,7 @@ document.getElementById('closeBtn').addEventListener('click', () => {
   invoke('exit_app');
 });
 
-
+// 4. XỬ LÝ NÚT THÊM: Thêm xong gọi lưu ổ cứng
 document.getElementById('addBtn').addEventListener('click', async ()=>{
   if(!selected) return;
   const name = document.getElementById('eventName').value.trim();
@@ -189,7 +203,7 @@ document.getElementById('addBtn').addEventListener('click', async ()=>{
   document.getElementById('eventName').value='';
   document.getElementById('eventTime').value='';
   
-  await saveToDisk(); 
+  await saveToDisk(); // LƯU VÀO ĐĨA
   
   render(); renderPanel();
 });
@@ -203,6 +217,7 @@ document.getElementById('todayBtn').addEventListener('click',()=>{
   render(); renderPanel();
 });
 
+// 5. HÀM KHỞI ĐỘNG: Đọc ổ cứng trước khi vẽ
 async function initApp() {
   try {
     const data = await invoke('load_jobs');
@@ -217,5 +232,21 @@ async function initApp() {
   render();
   renderPanel();
 }
+
+function openTaskModal(name, timeStr) {
+    document.getElementById('modalName').textContent = name;
+    document.getElementById('modalTime').textContent = timeStr;
+    document.getElementById('taskModal').classList.add('active');
+}
+
+window.closeTaskModal = function() {
+    document.getElementById('taskModal').classList.remove('active');
+}
+
+document.getElementById('taskModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeTaskModal();
+    }
+});
 
 initApp();
