@@ -16,6 +16,12 @@
   --accent2:      #2a7ac9;
   --accent3:      #2ac97a;
   --today-glow:   rgba(201, 79, 42, 0.18);
+  /* Calendar cell states, vintage sepia at three strengths: today > selected > hover */
+  --cell-today:        #7b5139;   /* sepia ink */
+  --cell-selected:     #e3d3bd;   /* aged parchment */
+  --cell-hover:        #f0e8db;   /* light linen */
+  --cell-today-shadow: rgba(123, 81, 57, 0.30);
+  --cell-sel-shadow:   rgba(123, 81, 57, 0.14);
   --gold:         #c9a82a;
   --green:        #2ac97a;
   --red:          #c94f2a;
@@ -255,30 +261,27 @@ body::before {
 }
 
 .mp-month:hover {
-  background: var(--accent-light);
-  border-color: rgba(201,79,42,0.15);
+  background: var(--cell-hover);
+  border-color: var(--cell-hover);
   color: var(--ink);
 }
 
 /* Current real month (same idea as the "today" cell) */
+/* Current real month: strongest fill (same as the "today" cell) */
 .mp-month.is-today {
-  color: var(--accent);
-  font-weight: 700;
-  border-color: rgba(201,79,42,0.30);
-}
-
-/* Month currently shown in the calendar (same idea as the "selected" cell) */
-.mp-month.active {
-  background: var(--ink);
-  border-color: var(--ink);
+  background: var(--cell-today);
+  border-color: var(--cell-today);
   color: #fff;
-  box-shadow: 0 4px 16px rgba(26,20,16,0.20);
+  font-weight: 700;
+  box-shadow: 0 2px 10px var(--cell-today-shadow);
 }
 
-.mp-month.active.is-today {
-  background: var(--accent);
-  border-color: var(--accent);
-  box-shadow: 0 2px 10px rgba(201,79,42,0.35);
+/* Month shown in the calendar: medium fill (same as the "selected" cell) */
+.mp-month.active:not(.is-today) {
+  background: var(--cell-selected);
+  border-color: var(--cell-selected);
+  color: var(--ink);
+  font-weight: 700;
 }
 
 .mp-month:focus-visible {
@@ -417,9 +420,9 @@ body::before {
   min-width: 0;
 }
 
+/* Hover: lightest fill (the colour is set at the end of the HOLIDAYS section,
+   so it also wins over holiday tints) */
 .day-cell:hover:not(.empty):not(.other-month) {
-  background: var(--accent-light);
-  border-color: rgba(201,79,42,0.15);
   transform: scale(1.02);
   box-shadow: 0 4px 12px rgba(26,20,16,0.08);
 }
@@ -427,19 +430,23 @@ body::before {
 .day-cell.other-month { cursor: default; }
 .day-cell.other-month .day-num { color: var(--ink-dim); opacity: 0.5; }
 
+/* Selected: medium fill, dark text */
 .day-cell.selected:not(.today) {
-  background: var(--ink);
-  border-color: var(--ink);
-  box-shadow: 0 4px 16px rgba(26,20,16,0.20);
+  background: var(--cell-selected);
+  border-color: var(--cell-selected);
+  box-shadow: 0 4px 14px var(--cell-sel-shadow);
 }
 
-.day-cell.selected:not(.today) .day-num { color: #fff; }
-.day-cell.selected:not(.today) .dot { opacity: 0.6; }
+/* Dark number on the medium fill, also for weekends/holidays (orange on it is too faint) */
+.day-cell.selected:not(.today) .day-num,
+.day-cell.selected:not(.today).we-day .day-num,
+.day-cell.selected.holiday:not(.today) .day-num { color: var(--ink); font-weight: 700; }
 
+/* Today: strongest fill, white text (wins over holiday tint and selection) */
 .day-cell.today {
-  background: var(--accent-light);
-  border-color: rgba(201,79,42,0.30);
-  box-shadow: 0 0 0 1px rgba(201,79,42,0.12), 0 4px 16px var(--today-glow);
+  background: var(--cell-today);
+  border-color: var(--cell-today);
+  box-shadow: 0 4px 16px var(--cell-today-shadow);
 }
 
 .day-num {
@@ -451,16 +458,18 @@ body::before {
   border-radius: 8px; flex-shrink: 0;
 }
 
-.day-cell.today .day-num {
-  background: var(--accent);
-  color: #fff;
-  font-weight: 700;
-  box-shadow: 0 2px 10px rgba(201,79,42,0.35);
-}
-
 .day-cell.we-day:not(.other-month) .day-num { color: var(--accent); }
-.day-cell.today.we-day .day-num { color: #fff; }
-.day-cell.selected:not(.today).we-day .day-num { color: #fff; }
+
+.day-cell.today .day-num,
+.day-cell.today.we-day .day-num { color: #fff; font-weight: 700; }
+.day-cell.today .lunar-label,
+.day-cell.today .lunar-label.lunar-first { color: rgba(255,255,255,0.8); }
+.day-cell.today .hol-icon { color: #fff; }
+.day-cell.today .dot { box-shadow: 0 0 0 1.5px rgba(255,255,255,0.9); }
+.day-cell.today .dots-more,
+.day-cell.today .cell-more { color: rgba(255,255,255,0.85); }
+.day-cell.today .cell-hol { color: #fff; }
+.day-cell.today .cell-ev { color: #fff; background: rgba(255,255,255,0.18); box-shadow: inset 2px 0 0 #fff; }
 
 .dots {
   display: flex; align-items: center; gap: 3px;
@@ -482,7 +491,6 @@ body::before {
   margin-left: 1px;
 }
 
-.day-cell.selected:not(.today) .dots-more { color: rgba(255,255,255,0.7); }
 
 /* Large cells: holiday name + event titles */
 .cell-body {
@@ -526,9 +534,6 @@ body::before {
   padding-left: 7px;
 }
 
-.day-cell.selected:not(.today) .cell-hol  { color: rgba(255,255,255,0.85); }
-.day-cell.selected:not(.today) .cell-ev   { color: #fff; background: rgba(255,255,255,0.10); }
-.day-cell.selected:not(.today) .cell-more { color: rgba(255,255,255,0.7); }
 
 /* Large cells: a bigger date number */
 .days-grid[data-size="lg"] .day-num { font-size: 0.95rem; }
@@ -848,9 +853,6 @@ body::before {
   font-size: 0.55rem; 
 }
 
-/* When cell is selected (dark background), lighten lunar text */
-.day-cell.selected:not(.today) .lunar-label       { color: rgba(255,255,255,0.45); }
-.day-cell.selected:not(.today) .lunar-label.lunar-first { color: rgba(255,255,255,0.75); }
 
 /* ── SEL-LUNAR (selected date display) ─────────── */
 .sel-lunar {
@@ -1018,7 +1020,7 @@ body::before {
   background: linear-gradient(155deg, rgba(29,107,67,0.09) 0%, rgba(180,35,26,0.05) 85%);
 }
 
-.day-cell.holiday:not(.today):not(.selected) .day-num { color: var(--hol); }
+.day-cell.holiday:not(.today) .day-num { color: var(--hol); }
 .day-cell.hol-off:not(.today) .day-num { font-weight: 700; }
 
 .hol-icon {
@@ -1058,6 +1060,12 @@ body::before {
   transform: translateX(-60%);
   animation: holShine 5s ease-in-out infinite;
   pointer-events: none;
+}
+
+/* Hover: lightest fill of the three cell states, also over holiday tints */
+.day-cell:not(.today):not(.selected):not(.other-month):not(.empty):hover {
+  background: var(--cell-hover);
+  border-color: var(--cell-hover);
 }
 
 @keyframes holBob {
