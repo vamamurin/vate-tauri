@@ -38,8 +38,10 @@ const COLORS = [
 //  SETTINGS  (persisted via Rust JSON)
 // ─────────────────────────────────────────────────────────────
 let settings = {
-  lang:  'en',
-  lunar: false,
+  lang:       'en',
+  lunar:      false,
+  holidays:   true,   // show holidays on the calendar
+  holidayFx:  true,   // animated decorations for some holidays
 };
 
 async function loadSettings() {
@@ -272,6 +274,55 @@ function applyLanguage() {
 
   // Sync lunar toggle
   document.getElementById('lunarToggle').checked = settings.lunar;
+
+  // Sync holiday toggles (effects only make sense when holidays are shown)
+  document.getElementById('holidayToggle').checked   = settings.holidays;
+  document.getElementById('holidayFxToggle').checked = settings.holidayFx;
+  document.getElementById('holidayFxRow').classList.toggle('is-disabled', !settings.holidays);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  HOLIDAY HELPERS  (data lives in holidays.js)
+// ─────────────────────────────────────────────────────────────
+// y: full year, m0: month 0-11, d: day
+function holidaysOn(y, m0, d) {
+  if (!settings.holidays) return [];
+  return getHolidays(y, m0 + 1, d, (dd, mm, yy) => lunarCalc.get(dd, mm, yy));
+}
+
+function holidayName(h) {
+  return h[settings.lang] || h.en;
+}
+
+// Animated decoration for the selected-day card
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+function renderHolidayFx(fxType) {
+  const card  = document.getElementById('selCard');
+  const layer = document.getElementById('selFx');
+  const show  = fxType && settings.holidayFx && !prefersReducedMotion.matches;
+
+  // Keep running particles if the effect did not change (avoids restarting the animation)
+  if (show && layer.dataset.fx === fxType) return;
+
+  layer.innerHTML = '';
+  layer.dataset.fx = show ? fxType : '';
+  card.classList.toggle('has-fx', !!show);
+  if (!show) return;
+
+  const COUNT = { petals: 10, snow: 14, lanterns: 5 }[fxType];
+  for (let i = 0; i < COUNT; i++) {
+    const p = document.createElement('span');
+    p.className = `fx-p fx-${fxType}`;
+    // Spread particles evenly across the width, with random timing so they never line up
+    p.style.setProperty('--x',     `${(i + Math.random() * 0.8) / COUNT * 100}%`);
+    p.style.setProperty('--delay', `${-Math.random() * 8}s`);
+    p.style.setProperty('--dur',   `${6 + Math.random() * 5}s`);
+    p.style.setProperty('--size',  `${0.75 + Math.random() * 0.6}`);
+    p.style.setProperty('--sway',  `${(Math.random() < 0.5 ? -1 : 1) * (8 + Math.random() * 14)}px`);
+    if (fxType === 'petals') p.classList.add(i % 3 === 0 ? 'fx-gold' : 'fx-pink');
+    layer.appendChild(p);
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -355,6 +406,20 @@ function render() {
 
     div.appendChild(dateGroup);
 
+    // Holiday: tinted cell + theme icon + tooltip with all names
+    const hols = c.other ? [] : holidaysOn(c.yr, c.mo, c.day);
+    if (hols.length) {
+      const theme = hols[0].theme; // highest priority decides the look
+      div.classList.add('holiday', `hol-${theme}`);
+      if (hols.some(h => h.off)) div.classList.add('hol-off');
+      div.title = hols.map(holidayName).join(' · ');
+
+      const icon = document.createElement('span');
+      icon.className = 'hol-icon';
+      icon.innerHTML = HOLIDAY_THEMES[theme].icon;
+      div.appendChild(icon);
+    }
+
     // Event dots
     if (evList.length) {
       const dots = document.createElement('div');
@@ -433,6 +498,18 @@ function renderPanel() {
     lunarLine.innerHTML = '';
     lunarLine.style.display = 'none';
   }
+
+  // Holidays of the selected day: one chip each, plus the card effect
+  const hols = holidaysOn(selected.y, selected.m, selected.d);
+  document.getElementById('selHolidays').innerHTML = hols.map(h => `
+    <div class="hol-chip hol-${h.theme}">
+      <span class="hol-chip-icon">${HOLIDAY_THEMES[h.theme].icon}</span>
+      <span class="hol-chip-name">${holidayName(h)}</span>
+      ${h.off ? `<span class="hol-chip-off">${dict.dayOff}</span>` : ''}
+    </div>
+  `).join('');
+  const fxHol = hols.find(h => HOLIDAY_THEMES[h.theme].fx);
+  renderHolidayFx(fxHol ? HOLIDAY_THEMES[fxHol.theme].fx : null);
 
   // Events list
   const evList = events[k] || [];
@@ -757,6 +834,24 @@ document.getElementById('lunarToggle').addEventListener('change', function() {
   render();
   renderPanel();
 });
+
+// Holiday toggles
+document.getElementById('holidayToggle').addEventListener('change', function() {
+  settings.holidays = this.checked;
+  saveSettings();
+  applyLanguage();
+  render();
+  renderPanel();
+});
+
+document.getElementById('holidayFxToggle').addEventListener('change', function() {
+  settings.holidayFx = this.checked;
+  saveSettings();
+  renderPanel();
+});
+
+// Follow the OS "reduce motion" setting live
+prefersReducedMotion.addEventListener('change', () => renderPanel());
 
 // ─────────────────────────────────────────────────────────────
 //  INIT

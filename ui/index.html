@@ -74,10 +74,12 @@
             <div class="side-panel">
                 <div>
                     <div class="panel-section-title" data-i18n="selectedDay">Selected Day</div>
-                    <div class="selected-date-display">
+                    <div class="selected-date-display" id="selCard">
+                        <div class="sel-fx" id="selFx" aria-hidden="true"></div>
                         <div class="sel-weekday" id="selWeekday">—</div>
                         <div class="sel-date" id="selDate" data-i18n-placeholder="pickDate">Pick a date</div>
                         <div class="sel-lunar" id="selLunar"></div>
+                        <div class="sel-holidays" id="selHolidays"></div>
                     </div>
                 </div>
 
@@ -187,11 +189,48 @@
                     </div>
                 </div>
 
+                <div class="setting-divider"></div>
+
+                <!-- Holidays -->
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <div class="setting-label-main" data-i18n="settingHolidays">Holidays</div>
+                        <div class="setting-label-sub" data-i18n="settingHolidaysSub">Show Vietnamese holidays and special days</div>
+                    </div>
+                    <div class="setting-control">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="holidayToggle" />
+                            <span class="toggle-track">
+                                <span class="toggle-thumb"></span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="setting-divider"></div>
+
+                <!-- Holiday effects -->
+                <div class="setting-row" id="holidayFxRow">
+                    <div class="setting-label">
+                        <div class="setting-label-main" data-i18n="settingHolidayFx">Holiday Effects</div>
+                        <div class="setting-label-sub" data-i18n="settingHolidayFxSub">Blossoms, snow and lanterns on special days</div>
+                    </div>
+                    <div class="setting-control">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="holidayFxToggle" />
+                            <span class="toggle-track">
+                                <span class="toggle-thumb"></span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
     <script src="js/i18n.js"></script>
+    <script src="js/holidays.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
