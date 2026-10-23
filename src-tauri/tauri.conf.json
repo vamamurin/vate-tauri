@@ -15,6 +15,8 @@
         "title": "Vate",
         "width": 860,
         "height": 700,
+        "minWidth": 760,
+        "minHeight": 600,
         "decorations": false,
         "transparent": true,
         "resizable": true

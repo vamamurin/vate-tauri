@@ -294,35 +294,132 @@ function holidayName(h) {
   return h[settings.lang] || h.en;
 }
 
-// Animated decoration for the selected-day card
+// ─────────────────────────────────────────────────────────────
+//  HOLIDAY EFFECTS
+//  Tier 2: effect inside the selected-day card
+//  Tier 3: effect over the whole app
+// ─────────────────────────────────────────────────────────────
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-function renderHolidayFx(fxType) {
-  const card  = document.getElementById('selCard');
-  const layer = document.getElementById('selFx');
-  const show  = fxType && settings.holidayFx && !prefersReducedMotion.matches;
+// Particle counts: [card, whole app]
+const FX_TYPES = {
+  petals:    { motion: 'fall',  count: [10, 26] },
+  snow:      { motion: 'fall',  count: [14, 42] },
+  confetti:  { motion: 'fall',  count: [12, 32] },
+  stars:     { motion: 'fall',  count: [8, 20] },
+  hearts:    { motion: 'rise',  count: [7, 18] },
+  lanterns:  { motion: 'rise',  count: [5, 14] },
+  fireworks: { motion: 'burst', count: [3, 6] },   // bursts of 12 sparks each
+};
 
-  // Keep running particles if the effect did not change (avoids restarting the animation)
-  if (show && layer.dataset.fx === fxType) return;
+function effectsAllowed() {
+  return settings.holidays && settings.holidayFx && !prefersReducedMotion.matches;
+}
 
-  layer.innerHTML = '';
-  layer.dataset.fx = show ? fxType : '';
-  card.classList.toggle('has-fx', !!show);
-  if (!show) return;
+const rand = (min, max) => min + Math.random() * (max - min);
 
-  const COUNT = { petals: 10, snow: 14, lanterns: 5 }[fxType];
-  for (let i = 0; i < COUNT; i++) {
-    const p = document.createElement('span');
-    p.className = `fx-p fx-${fxType}`;
-    // Spread particles evenly across the width, with random timing so they never line up
-    p.style.setProperty('--x',     `${(i + Math.random() * 0.8) / COUNT * 100}%`);
-    p.style.setProperty('--delay', `${-Math.random() * 8}s`);
-    p.style.setProperty('--dur',   `${6 + Math.random() * 5}s`);
-    p.style.setProperty('--size',  `${0.75 + Math.random() * 0.6}`);
-    p.style.setProperty('--sway',  `${(Math.random() < 0.5 ? -1 : 1) * (8 + Math.random() * 14)}px`);
-    if (fxType === 'petals') p.classList.add(i % 3 === 0 ? 'fx-gold' : 'fx-pink');
-    layer.appendChild(p);
+/**
+ * Fill `layer` with particles for one holiday.
+ * Colours come from the .fx-theme-<theme> class (see style.css).
+ * Does nothing if the same effect is already running, so it never restarts on re-render.
+ */
+function setFx(layer, holiday, big) {
+  const want = holiday ? `${holiday.fx}:${holiday.theme}:${big ? 'big' : 'small'}` : '';
+  if (layer.dataset.fx === want) return;
+
+  layer.dataset.fx = want;
+  layer.innerHTML  = '';
+  layer.className  = layer.className.replace(/\bfx-theme-\S+/g, '').trim();
+  if (!holiday) return;
+
+  layer.classList.add(`fx-theme-${holiday.theme}`);
+  updateFxTravel(layer);
+
+  const type = FX_TYPES[holiday.fx];
+  const n    = type.count[big ? 1 : 0];
+
+  for (let i = 0; i < n; i++) {
+    if (type.motion === 'burst') {
+      // A firework: 12 sparks flying out from one point, repeating with its own rhythm
+      const burst = document.createElement('div');
+      burst.className = 'fx-burst';
+      burst.style.setProperty('--x',     `${rand(10, 90)}%`);
+      burst.style.setProperty('--y',     `${rand(big ? 10 : 15, big ? 55 : 60)}%`);
+      burst.style.setProperty('--dur',   `${rand(2.6, 3.6)}s`);
+      burst.style.setProperty('--delay', `${-rand(0, 3.6)}s`);
+      burst.style.setProperty('--r',     `${big ? rand(55, 95) : rand(26, 40)}px`);
+      for (let s = 0; s < 12; s++) {
+        const spark = document.createElement('span');
+        spark.className = `fx-spark c${(s + i) % 3 + 1}`;
+        spark.style.setProperty('--a', `${s * 30}deg`);
+        burst.appendChild(spark);
+      }
+      layer.appendChild(burst);
+    } else {
+      const p = document.createElement('span');
+      p.className = `fx-p fx-${holiday.fx} c${i % 3 + 1}`;
+      // Spread evenly across the width, random timing so particles never line up
+      p.style.setProperty('--x',     `${(i + Math.random() * 0.8) / n * 100}%`);
+      p.style.setProperty('--delay', `${-rand(0, 10)}s`);
+      p.style.setProperty('--dur',   `${big ? rand(9, 15) : rand(6, 11)}s`);
+      p.style.setProperty('--size',  `${rand(0.75, big ? 1.5 : 1.3)}`);
+      p.style.setProperty('--sway',  `${(Math.random() < 0.5 ? -1 : 1) * rand(8, big ? 40 : 22)}px`);
+      layer.appendChild(p);
+    }
   }
+}
+
+// Particles travel the full height of their layer
+function updateFxTravel(layer) {
+  layer.style.setProperty('--travel', `${layer.clientHeight + 40}px`);
+}
+
+/**
+ * Apply tier 2/3 effects for the selected day.
+ * `hols` is already sorted, most important first.
+ */
+function applyHolidayEffects(hols) {
+  const top = effectsAllowed() ? hols.find(h => h.tier >= 2 && h.fx) : null;
+  const app = document.querySelector('.app');
+
+  // Tier 3 → whole app (the card stays calm, the overlay covers it anyway)
+  setFx(document.getElementById('appFx'), top && top.tier === 3 ? top : null, true);
+  setFx(document.getElementById('selFx'), top && top.tier === 2 ? top : null, false);
+
+  // Festive accent on the app frame for tier 3 days
+  app.className = app.className.replace(/\bhol-\S+|\bfestive\b/g, '').trim();
+  if (top && top.tier === 3) app.classList.add('festive', `hol-${top.theme}`);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  CELL SIZE
+//  Cells show more detail when there is room for it:
+//    xs → number (+ lunar), colour bar for holidays, event dots
+//    md → + holiday icon
+//    lg → + holiday name and event titles instead of dots
+// ─────────────────────────────────────────────────────────────
+const CELL_GAP = 4;
+
+function cellLayout(grid, rows) {
+  const w = (grid.clientWidth  - CELL_GAP * 6) / 7;
+  const h = (grid.clientHeight - CELL_GAP * (rows - 1)) / rows;
+  const size = (w < 54 || h < 50) ? 'xs' : (w >= 92 && h >= 74) ? 'lg' : 'md';
+  return { w, h, size };
+}
+
+// Re-render only when the window change affects what fits in a cell
+let lastLayoutKey = '';
+let lastRows = 6;
+function layoutKey(l) {
+  return `${l.size}:${Math.floor(l.h / 18)}`;
+}
+
+// How many event titles fit in a large cell
+function eventSlots(cellH, hasHoliday) {
+  const head = settings.lunar ? 40 : 32;     // number (+ lunar) row incl. padding
+  const hol  = hasHoliday ? 17 : 0;          // holiday name line
+  const free = cellH - head - hol - 8;
+  return Math.max(0, Math.floor((free + 2) / 18)); // 16px line + 2px gap
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -350,12 +447,20 @@ function render() {
   const grid        = document.getElementById('daysGrid');
   grid.innerHTML    = '';
 
+  // Only as many weeks as the month needs (4-6), so rows get taller instead of empty
+  const rows = Math.ceil((firstDay + daysInMonth) / 7);
+  grid.style.gridTemplateRows = `repeat(${rows}, minmax(0, 1fr))`;
+  const layout = cellLayout(grid, rows);
+  grid.dataset.size = layout.size;
+  lastLayoutKey = layoutKey(layout);
+  lastRows = rows;
+
   let cells = [];
   for (let i = firstDay - 1; i >= 0; i--)
     cells.push({ day: daysInPrev - i, mo: m===0?11:m-1, yr: m===0?y-1:y, other: true });
   for (let d = 1; d <= daysInMonth; d++)
     cells.push({ day: d, mo: m, yr: y, other: false });
-  while (cells.length < 42) {
+  while (cells.length < rows * 7) {
     let d = cells.length - firstDay - daysInMonth + 1;
     cells.push({ day: d, mo: m===11?0:m+1, yr: m===11?y+1:y, other: true });
   }
@@ -376,11 +481,9 @@ function render() {
       isWE && !c.other ? 'we-day' : '',
     ].filter(Boolean).join(' ');
 
-    // Day number
-    // const num = document.createElement('div');
-    // num.className   = 'day-num';
-    // num.textContent = c.day;
-    // div.appendChild(num);
+    // Head row: date (+ lunar) on the left, holiday icon on the right
+    const head = document.createElement('div');
+    head.className = 'cell-head';
 
     const dateGroup = document.createElement('div');
     dateGroup.className = 'date-group';
@@ -404,40 +507,69 @@ function render() {
       dateGroup.appendChild(lunarEl);
     }
 
-    div.appendChild(dateGroup);
+    head.appendChild(dateGroup);
+    div.appendChild(head);
 
     // Holiday: tinted cell + theme icon + tooltip with all names
     const hols = c.other ? [] : holidaysOn(c.yr, c.mo, c.day);
-    if (hols.length) {
-      const theme = hols[0].theme; // highest priority decides the look
-      div.classList.add('holiday', `hol-${theme}`);
+    const top  = hols[0];  // most important decides the look
+    if (top) {
+      div.classList.add('holiday', `hol-${top.theme}`, `tier-${top.tier}`);
       if (hols.some(h => h.off)) div.classList.add('hol-off');
+      if (top.tier >= 2 && effectsAllowed()) div.classList.add('hol-anim');
       div.title = hols.map(holidayName).join(' · ');
 
       const icon = document.createElement('span');
       icon.className = 'hol-icon';
-      icon.innerHTML = HOLIDAY_THEMES[theme].icon;
-      div.appendChild(icon);
+      icon.innerHTML = HOLIDAY_THEMES[top.theme].icon;
+      head.appendChild(icon);
     }
 
-    // Event dots
-    if (evList.length) {
+    if (layout.size === 'lg' && !c.other) {
+      // Large cell: holiday name + event titles
+      const body = document.createElement('div');
+      body.className = 'cell-body';
+
+      if (top) {
+        const name = document.createElement('div');
+        name.className   = 'cell-hol';
+        name.textContent = holidayName(top) + (hols.length > 1 ? ` +${hols.length - 1}` : '');
+        body.appendChild(name);
+      }
+
+      const slots = eventSlots(layout.h, !!top);
+      const shown = evList.length > slots ? Math.max(0, slots - 1) : evList.length;
+      evList.slice(0, shown).forEach(e => {
+        const ev = document.createElement('div');
+        ev.className = 'cell-ev';
+        ev.style.setProperty('--ev', e.color);
+        ev.textContent = e.name;
+        body.appendChild(ev);
+      });
+      if (evList.length > shown) {
+        const more = document.createElement('div');
+        more.className   = 'cell-more';
+        more.textContent = `+${evList.length - shown}`;
+        body.appendChild(more);
+      }
+      div.appendChild(body);
+    } else if (evList.length) {
+      // Small/medium cell: coloured dots, "+N" when there are more than 3
       const dots = document.createElement('div');
       dots.className = 'dots';
-      evList.slice(0, 5).forEach(e => {
+      evList.slice(0, 3).forEach(e => {
         const dot = document.createElement('div');
         dot.className = 'dot';
-        dot.style.cssText = `background:${e.color};color:${e.color}`;
+        dot.style.background = e.color;
         dots.appendChild(dot);
       });
-      div.appendChild(dots);
-
-      if (evList.length > 1) {
-        const badge = document.createElement('div');
-        badge.className   = 'event-count';
-        badge.textContent = evList.length;
-        div.appendChild(badge);
+      if (evList.length > 3) {
+        const more = document.createElement('span');
+        more.className   = 'dots-more';
+        more.textContent = `+${evList.length - 3}`;
+        dots.appendChild(more);
       }
+      div.appendChild(dots);
     }
 
     if (!c.other) {
@@ -508,8 +640,7 @@ function renderPanel() {
       ${h.off ? `<span class="hol-chip-off">${dict.dayOff}</span>` : ''}
     </div>
   `).join('');
-  const fxHol = hols.find(h => HOLIDAY_THEMES[h.theme].fx);
-  renderHolidayFx(fxHol ? HOLIDAY_THEMES[fxHol.theme].fx : null);
+  applyHolidayEffects(hols);
 
   // Events list
   const evList = events[k] || [];
@@ -847,15 +978,32 @@ document.getElementById('holidayToggle').addEventListener('change', function() {
 document.getElementById('holidayFxToggle').addEventListener('change', function() {
   settings.holidayFx = this.checked;
   saveSettings();
-  renderPanel();
+  render();       // animated cells
+  renderPanel();  // card / whole-app effect
 });
 
 // Follow the OS "reduce motion" setting live
-prefersReducedMotion.addEventListener('change', () => renderPanel());
+prefersReducedMotion.addEventListener('change', () => { render(); renderPanel(); });
+
+// Window resized: re-render cells if a different amount of detail now fits,
+// and stretch running effects to the new height
+let resizeFrame = 0;
+new ResizeObserver(() => {
+  cancelAnimationFrame(resizeFrame);
+  resizeFrame = requestAnimationFrame(() => {
+    if (!appReady) return;
+    const grid = document.getElementById('daysGrid');
+    if (layoutKey(cellLayout(grid, lastRows)) !== lastLayoutKey) render();
+    updateFxTravel(document.getElementById('appFx'));
+    updateFxTravel(document.getElementById('selFx'));
+  });
+}).observe(document.getElementById('daysGrid'));
 
 // ─────────────────────────────────────────────────────────────
 //  INIT
 // ─────────────────────────────────────────────────────────────
+let appReady = false;
+
 async function initApp() {
   await loadSettings();
   applyLanguage();
@@ -870,6 +1018,7 @@ async function initApp() {
 
   render();
   renderPanel();
+  appReady = true;
 }
 
 initApp();

@@ -350,6 +350,7 @@ body::before {
   font-size: 0.76rem; font-weight: 600;
   color: var(--accent);
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 /* ── LAYOUT ─────────────────────────────────────── */
@@ -400,10 +401,20 @@ body::before {
   padding: 8px 7px 6px;
   cursor: pointer;
   position: relative;
-  display: flex; flex-direction: column; align-items: flex-start;
+  display: flex; flex-direction: column; align-items: stretch;
+  min-width: 0;
   transition: all 0.15s ease;
   border: 1px solid transparent;
   overflow: hidden;
+}
+
+/* Date (+ lunar) on the left, holiday icon on the right: they can never overlap */
+.cell-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4px;
+  min-width: 0;
 }
 
 .day-cell:hover:not(.empty):not(.other-month) {
@@ -452,33 +463,85 @@ body::before {
 .day-cell.selected:not(.today).we-day .day-num { color: #fff; }
 
 .dots {
-  display: flex; gap: 3px;
+  display: flex; align-items: center; gap: 3px;
   margin-top: auto; padding-top: 4px;
   position: relative; z-index: 1;
-  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .dot {
-  width: 5px; height: 5px;
+  width: 6px; height: 6px;
   border-radius: 50%; flex-shrink: 0;
 }
 
-.event-count {
-  position: absolute; top: 6px; right: 6px;
-  width: 16px; height: 16px;
-  border-radius: 50%;
-  background: var(--accent); color: #fff;
-  font-size: 0.6rem; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  opacity: 0; transform: scale(0.5);
-  transition: all 0.15s;
+.dots-more {
+  font-size: 0.56rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink-muted);
+  margin-left: 1px;
 }
 
-.day-cell:hover .event-count { opacity: 1; transform: scale(1); }
+.day-cell.selected:not(.today) .dots-more { color: rgba(255,255,255,0.7); }
+
+/* Large cells: holiday name + event titles */
+.cell-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.cell-hol,
+.cell-ev,
+.cell-more {
+  font-size: 0.66rem;
+  line-height: 16px;
+  height: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+.cell-hol {
+  font-weight: 600;
+  color: var(--hol, var(--ink-muted));
+  margin-bottom: 1px;
+}
+
+.cell-ev {
+  padding: 0 6px 0 7px;
+  border-radius: 5px;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ev) 12%, transparent);
+  box-shadow: inset 2px 0 0 var(--ev);
+}
+
+.cell-more {
+  font-weight: 600;
+  color: var(--ink-muted);
+  padding-left: 7px;
+}
+
+.day-cell.selected:not(.today) .cell-hol  { color: rgba(255,255,255,0.85); }
+.day-cell.selected:not(.today) .cell-ev   { color: #fff; background: rgba(255,255,255,0.10); }
+.day-cell.selected:not(.today) .cell-more { color: rgba(255,255,255,0.7); }
+
+/* Large cells: a bigger date number */
+.days-grid[data-size="lg"] .day-num { font-size: 0.95rem; }
+
+/* Extra-small cells: tighter padding, smaller lunar text */
+.days-grid[data-size="xs"] .day-cell { padding: 5px 4px 4px; border-radius: 10px; }
+.days-grid[data-size="xs"] .day-num  { width: 22px; height: 22px; font-size: 0.78rem; }
+.days-grid[data-size="xs"] .dot      { width: 5px; height: 5px; }
 
 /* ── SIDE PANEL ─────────────────────────────────── */
 .side-panel {
-  width: 320px;
+  /* Narrower on small windows so the calendar keeps usable cells */
+  width: clamp(260px, 26vw, 340px);
   flex-shrink: 0;
   border-left: 1px solid var(--border);
   padding: 22px 24px 26px;
@@ -913,45 +976,106 @@ body::before {
 }
 
 /* ── HOLIDAYS ───────────────────────────────────── */
-/* One colour set per theme: text, tint, border, icon */
-.hol-tet         { --hol: #c8321f; --hol-bg: rgba(200,50,31,0.07);  --hol-border: rgba(200,50,31,0.24);  --hol-icon: #e0a106; }
-.hol-christmas   { --hol: #2f7d4f; --hol-bg: rgba(47,125,79,0.08);  --hol-border: rgba(47,125,79,0.26);  --hol-icon: #2f7d4f; }
-.hol-midautumn   { --hol: #b8650f; --hol-bg: rgba(217,138,28,0.10); --hol-border: rgba(217,138,28,0.30); --hol-icon: #e08a1e; }
-.hol-national    { --hol: #c8281e; --hol-bg: rgba(200,40,30,0.05);  --hol-border: rgba(200,40,30,0.18);  --hol-icon: #d63a2a; }
-.hol-love        { --hol: #c13d6b; --hol-bg: rgba(214,69,122,0.07); --hol-border: rgba(214,69,122,0.22); --hol-icon: #e05587; }
-.hol-traditional { --hol: #93641a; --hol-bg: rgba(168,116,42,0.08); --hol-border: rgba(168,116,42,0.24); --hol-icon: #c08a2e; }
-.hol-observance  { --hol: #2a6fb5; --hol-bg: rgba(42,122,201,0.06); --hol-border: rgba(42,122,201,0.20); --hol-icon: #2a7ac9; }
+/* One colour set per theme, chosen for meaning:
+   Tết = lacquer red + apricot gold, national = flag red + star gold,
+   New Year = champagne gold, Christmas = pine green, Mid-Autumn = lantern amber,
+   love = rose, traditional = incense plum + lotus pink, observance = calm slate.
+   --hol text, --hol-bg tint, --hol-border, --hol-icon.
+   Particle colours for effects are on .fx-theme-* below. */
+.hol-tet         { --hol: #b4231a; --hol-bg: rgba(180,35,26,0.06);   --hol-border: rgba(180,35,26,0.24);   --hol-icon: #e3a008; }
+.hol-national    { --hol: #c8102e; --hol-bg: rgba(200,16,46,0.055);  --hol-border: rgba(200,16,46,0.22);   --hol-icon: #f0b000; }
+.hol-newyear     { --hol: #8a6a14; --hol-bg: rgba(201,160,40,0.10);  --hol-border: rgba(201,160,40,0.34);  --hol-icon: #c99a1a; }
+.hol-christmas   { --hol: #1d6b43; --hol-bg: rgba(29,107,67,0.07);   --hol-border: rgba(29,107,67,0.26);   --hol-icon: #1d6b43; }
+.hol-midautumn   { --hol: #b45309; --hol-bg: rgba(234,138,26,0.10);  --hol-border: rgba(234,138,26,0.32);  --hol-icon: #ea8a1a; }
+.hol-love        { --hol: #be185d; --hol-bg: rgba(225,72,128,0.07);  --hol-border: rgba(225,72,128,0.24);  --hol-icon: #e1487f; }
+.hol-traditional { --hol: #7b4a8c; --hol-bg: rgba(123,74,140,0.07);  --hol-border: rgba(123,74,140,0.24);  --hol-icon: #c06a9f; }
+.hol-observance  { --hol: #475d78; --hol-bg: rgba(71,93,120,0.06);   --hol-border: rgba(71,93,120,0.20);   --hol-icon: #6b819c; }
 
-/* Calendar cell */
+/* Effect layers take the colours of their holiday */
+.fx-theme-tet         { --fx-c1: #f3a9bb; --fx-c2: #f2c14e; --fx-c3: #e2574c; }
+.fx-theme-national    { --fx-c1: #da251d; --fx-c2: #ffcd00; --fx-c3: #f59e0b; }
+.fx-theme-newyear     { --fx-c1: #f2c14e; --fx-c2: #e1487f; --fx-c3: #4c8ed9; }
+.fx-theme-christmas   { --fx-c1: #c5d8ea; --fx-c2: #d9e6f2; --fx-c3: #b3c9de; }
+.fx-theme-midautumn   { --fx-c1: #ffb547; --fx-c2: #f07e1a; --fx-c3: #e2574c; }
+.fx-theme-love        { --fx-c1: #f38fb0; --fx-c2: #e1487f; --fx-c3: #f7b8cb; }
+.fx-theme-traditional { --fx-c1: #f2a3c7; --fx-c2: #f2c14e; --fx-c3: #c792d6; }
+.fx-theme-observance  { --fx-c1: #4c8ed9; --fx-c2: #f2c14e; --fx-c3: #e1487f; }
+
+/* ── Calendar cell ── */
 .day-cell.holiday:not(.today):not(.selected) {
   background: var(--hol-bg);
   border-color: var(--hol-border);
 }
 
-/* Tết and Christmas get a two-tone tint */
+/* Big celebrations get a two-tone tint */
 .day-cell.hol-tet:not(.today):not(.selected) {
-  background: linear-gradient(155deg, rgba(224,161,6,0.13) 0%, rgba(200,50,31,0.08) 70%);
+  background: linear-gradient(155deg, rgba(227,160,8,0.14) 0%, rgba(180,35,26,0.07) 75%);
+}
+.day-cell.hol-national.tier-3:not(.today):not(.selected) {
+  background: linear-gradient(155deg, rgba(240,176,0,0.12) 0%, rgba(200,16,46,0.08) 75%);
 }
 .day-cell.hol-christmas:not(.today):not(.selected) {
-  background: linear-gradient(155deg, rgba(47,125,79,0.10) 0%, rgba(200,50,31,0.06) 80%);
+  background: linear-gradient(155deg, rgba(29,107,67,0.09) 0%, rgba(180,35,26,0.05) 85%);
 }
 
 .day-cell.holiday:not(.today):not(.selected) .day-num { color: var(--hol); }
 .day-cell.hol-off:not(.today) .day-num { font-weight: 700; }
 
 .hol-icon {
-  position: absolute;
-  right: 7px; bottom: 6px;
+  flex-shrink: 0;
   width: 13px; height: 13px;
+  margin-top: 2px;
   color: var(--hol-icon);
   pointer-events: none;
+  position: relative;
   z-index: 1;
 }
+
+.days-grid[data-size="lg"] .hol-icon { width: 15px; height: 15px; margin: 3px 2px 0 0; }
+.days-grid[data-size="xs"] .hol-icon { width: 10px; height: 10px; margin-top: 1px; }
 
 .hol-icon svg,
 .hol-chip-icon svg { width: 100%; height: 100%; display: block; }
 
-/* Selected-day card: holiday chips */
+/* Tier 2+: the cell itself is gently animated */
+.day-cell.hol-anim .hol-icon { animation: holBob 2.8s ease-in-out infinite; }
+
+.day-cell.hol-anim:not(.today):not(.selected)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  animation: holGlow 3.2s ease-in-out infinite;
+}
+
+/* Tier 3: a light sweep crosses the cell now and then */
+.day-cell.tier-3.hol-anim::before {
+  content: '';
+  position: absolute;
+  inset: -10% -70%;
+  background: linear-gradient(105deg, transparent 42%, rgba(255,255,255,0.6) 50%, transparent 58%);
+  transform: translateX(-60%);
+  animation: holShine 5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes holBob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-2px) rotate(-8deg); }
+}
+
+@keyframes holGlow {
+  0%, 100% { box-shadow: inset 0 0 0 0 transparent; }
+  50%      { box-shadow: inset 0 0 14px 0 var(--hol-border); }
+}
+
+@keyframes holShine {
+  0%, 60% { transform: translateX(-60%); }
+  100%    { transform: translateX(60%); }
+}
+
+/* ── Selected-day card: holiday chips ── */
 .sel-holidays {
   display: flex;
   flex-direction: column;
@@ -999,7 +1123,7 @@ body::before {
   text-transform: uppercase;
 }
 
-/* Selected-day card: animated decoration layer (behind the text) */
+/* ── Effect layers ── */
 .selected-date-display {
   position: relative;
   overflow: hidden;
@@ -1015,66 +1139,155 @@ body::before {
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  --fx-opacity: 0.5;
 }
 
+/* Whole-app layer: above the calendar, below the month picker and dialogs */
+.app-fx {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  --fx-opacity: 0.6;
+}
+
+/* Tier 3: a festive line under the header in the holiday's colours */
+.app.festive .header::after {
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--hol-icon) 25%, var(--hol) 50%, var(--hol-icon) 75%, transparent);
+}
+
+/* ── Particles ── */
 .fx-p {
   position: absolute;
   left: var(--x);
-  top: -14px;
+  top: -16px;
   width:  calc(9px * var(--size));
   height: calc(9px * var(--size));
   opacity: 0;
+  background: var(--fx-c1);
   animation: fxFall var(--dur) linear var(--delay) infinite;
   will-change: transform, opacity;
 }
 
-/* Tết: apricot (gold) and peach (pink) petals */
-.fx-petals { border-radius: 70% 0 70% 0; }
-.fx-petals.fx-pink { background: #f3a9bb; }
-.fx-petals.fx-gold { background: #f2c14e; }
+.fx-p.c2 { background: var(--fx-c2); }
+.fx-p.c3 { background: var(--fx-c3); }
 
-/* Christmas: snow */
+.fx-petals { border-radius: 70% 0 70% 0; }
+
 .fx-snow {
   width:  calc(6px * var(--size));
   height: calc(6px * var(--size));
   border-radius: 50%;
-  background: #c5d8ea;
+  --fx-opacity: 0.85;
 }
 
-/* Mid-Autumn: small glowing lanterns rising */
-.fx-lanterns {
+.fx-confetti {
+  width:  calc(5px * var(--size));
+  height: calc(9px * var(--size));
+  border-radius: 1px;
+  animation-name: fxFlutter;
+}
+
+.fx-stars,
+.fx-hearts {
+  -webkit-mask: var(--shape) center / contain no-repeat;
+          mask: var(--shape) center / contain no-repeat;
+}
+
+.fx-stars {
+  width:  calc(10px * var(--size));
+  height: calc(10px * var(--size));
+  background: var(--fx-c2);
+  --shape: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m12 2.2 2.9 6.6 7.1.7-5.4 4.7 1.6 7L12 17.5l-6.2 3.7 1.6-7L2 9.5l7.1-.7z'/%3E%3C/svg%3E");
+}
+.fx-stars.c1 { background: var(--fx-c1); }
+
+.fx-hearts {
   top: auto;
   bottom: -16px;
+  width:  calc(11px * var(--size));
+  height: calc(11px * var(--size));
+  animation-name: fxRise;
+  --shape: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21s-7.6-4.6-9.6-9.4C.9 8.2 3 4.4 6.7 4.4c2.1 0 3.7 1.2 5.3 3.2 1.6-2 3.2-3.2 5.3-3.2 3.7 0 5.8 3.8 4.3 7.2C19.6 16.4 12 21 12 21z'/%3E%3C/svg%3E");
+}
+
+.fx-lanterns {
+  top: auto;
+  bottom: -18px;
   width:  calc(8px * var(--size));
   height: calc(10px * var(--size));
   border-radius: 45%;
-  background: radial-gradient(circle at 50% 40%, #ffd98a, #e0861e 70%);
-  box-shadow: 0 0 10px rgba(240,160,40,0.55);
+  background: radial-gradient(circle at 50% 40%, #ffe3a3, var(--fx-c2) 72%);
+  box-shadow: 0 0 10px var(--fx-c1);
   animation-name: fxRise;
 }
+.fx-lanterns.c2, .fx-lanterns.c3 { background: radial-gradient(circle at 50% 40%, #ffe3a3, var(--fx-c3) 72%); }
 
-/* Kept faint: decoration sits behind the date text and must not compete with it */
+/* Fireworks: each burst sends 12 sparks outwards, then rests */
+.fx-burst {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 0; height: 0;
+}
+
+/* Each spark is a short streak pointing the way it flies */
+.fx-spark {
+  position: absolute;
+  left: -1.5px; top: -6px;
+  width: 3px; height: 12px;
+  border-radius: 3px;
+  background: linear-gradient(to top, transparent, var(--fx-c1));
+  box-shadow: 0 0 6px var(--fx-c1);
+  opacity: 0;
+  animation: fxSpark var(--dur) ease-out var(--delay) infinite;
+  will-change: transform, opacity;
+}
+.fx-spark.c2 { background: linear-gradient(to top, transparent, var(--fx-c2)); box-shadow: 0 0 6px var(--fx-c2); }
+.fx-spark.c3 { background: linear-gradient(to top, transparent, var(--fx-c3)); box-shadow: 0 0 6px var(--fx-c3); }
+
+/* Faint on purpose: decoration must never compete with the text */
 @keyframes fxFall {
-  0%   { transform: translate3d(0, 0, 0) rotate(0deg);                opacity: 0; }
-  12%  { opacity: var(--fx-opacity, 0.5); }
-  50%  { transform: translate3d(var(--sway), 95px, 0) rotate(180deg); }
-  85%  { opacity: var(--fx-opacity, 0.5); }
-  100% { transform: translate3d(0, 200px, 0) rotate(360deg);         opacity: 0; }
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg);                                  opacity: 0; }
+  10%  { opacity: var(--fx-opacity); }
+  50%  { transform: translate3d(var(--sway), calc(var(--travel) / 2), 0) rotate(180deg); }
+  88%  { opacity: var(--fx-opacity); }
+  100% { transform: translate3d(0, var(--travel), 0) rotate(360deg);                    opacity: 0; }
+}
+
+@keyframes fxFlutter {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg) rotateY(0deg);                               opacity: 0; }
+  10%  { opacity: var(--fx-opacity); }
+  50%  { transform: translate3d(var(--sway), calc(var(--travel) / 2), 0) rotate(200deg) rotateY(180deg); }
+  88%  { opacity: var(--fx-opacity); }
+  100% { transform: translate3d(0, var(--travel), 0) rotate(400deg) rotateY(360deg);                 opacity: 0; }
 }
 
 @keyframes fxRise {
-  0%   { transform: translate3d(0, 0, 0);                 opacity: 0; }
-  15%  { opacity: var(--fx-opacity, 0.5); }
-  50%  { transform: translate3d(var(--sway), -95px, 0); }
-  85%  { opacity: var(--fx-opacity, 0.5); }
-  100% { transform: translate3d(0, -200px, 0);            opacity: 0; }
+  0%   { transform: translate3d(0, 0, 0);                                    opacity: 0; }
+  14%  { opacity: var(--fx-opacity); }
+  50%  { transform: translate3d(var(--sway), calc(var(--travel) / -2), 0); }
+  85%  { opacity: var(--fx-opacity); }
+  100% { transform: translate3d(0, calc(var(--travel) * -1), 0);             opacity: 0; }
 }
 
-.fx-snow     { --fx-opacity: 0.8; }  /* pale colour, can be more opaque */
-.fx-lanterns { --fx-opacity: 0.55; }
+@keyframes fxSpark {
+  0%   { transform: rotate(var(--a)) translateY(0) scaleY(0.3);                           opacity: 0; }
+  4%   { opacity: 1; }
+  40%  { transform: rotate(var(--a)) translateY(calc(var(--r) * -1)) scaleY(1.4);        opacity: 0.95; }
+  62%  { transform: rotate(var(--a)) translateY(calc(var(--r) * -1.15)) scaleY(0.5);     opacity: 0; }
+  100% { transform: rotate(var(--a)) translateY(calc(var(--r) * -1.15)) scaleY(0.5);     opacity: 0; }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .fx-p { display: none; }
+  .fx-p, .fx-burst { display: none; }
+  .day-cell.hol-anim .hol-icon,
+  .day-cell.hol-anim::after,
+  .day-cell.hol-anim::before { animation: none; }
 }
 
 /* Settings: a row that depends on another toggle */
@@ -1084,12 +1297,26 @@ body::before {
 }
 
 /* ── RESPONSIVE ─────────────────────────────────── */
+/* Small app windows (the minimum is 760x600): tighter header and calendar */
+@media (max-width: 960px) {
+  .header { padding: 22px 24px 18px; gap: 10px; }
+  .header::after { left: 24px; right: 24px; }
+  .month-nav { gap: 8px; }
+  .month-title { font-size: 2rem; min-width: 0; }
+  .header-right { gap: 8px; }
+  .main-cal { padding: 18px 20px 22px; }
+  .side-panel { padding: 20px 18px 22px; }
+  .footer { padding: 12px 24px; }
+}
+
+/* Narrow windows (browser preview; the app window has a minimum size):
+   stack calendar and panel and let the whole area scroll */
 @media (max-width: 700px) {
   .header { padding: 18px 20px 16px; flex-wrap: wrap; }
   .month-title { font-size: 1.8rem; min-width: unset; }
-  .main-cal { padding: 14px 16px 18px; }
-  .layout { flex-direction: column; }
-  .side-panel { width: 100%; border-left: none; border-top: 1px solid var(--border); }
+  .main-cal { padding: 14px 16px 18px; flex: none; height: max(340px, 62vh); }
+  .layout { flex-direction: column; overflow-y: auto; }
+  .side-panel { width: 100%; overflow: visible; border-left: none; border-top: 1px solid var(--border); }
   .footer { padding: 12px 16px; flex-direction: column; gap: 8px; }
   .streak-badge { display: none; }
 }
