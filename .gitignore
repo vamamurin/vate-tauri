@@ -1,20 +1,11 @@
-# Rust / Cargo build outputs
+# Rust / Cargo build output
 /src-tauri/target/
-target/
-debug/
-*.pdb
 **/*.rs.bk
 
-# Tauri build & bundle temporary artifacts
-src-tauri/gen/schemas/*.json.bak
+# Tauri generated schemas (recreated on every build)
+/src-tauri/gen/schemas/
 
-# Local application data & user settings (chỉ ignore dữ liệu runtime, không dùng **/*.json)
-jobs.json
-settings.json
-*.db
-*.sqlite
-
-# System / OS files
+# OS files
 .DS_Store
 Thumbs.db
 desktop.ini
@@ -30,5 +21,8 @@ desktop.ini
 *.swp
 *~
 *.log
+
+# Secrets
 .env
 .env.*
+!.env.example
