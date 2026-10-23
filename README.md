@@ -6,15 +6,17 @@ A minimal, offline desktop calendar with Vietnamese lunar dates, built with [Tau
 
 ## Features
 
-- **Month view** with today highlight, weekend colouring and a "how far through the month" progress bar
-- **Events per day** with an optional time and one of six colours; click an event to see its details
+- **Month view** with a progress bar for the month; jump to any month from 1900 to 2100 by clicking the month title
+- **Events per day** with an optional time and one of six colours; on large windows each day shows its event titles
 - **Vietnamese lunar calendar** (toggle in Settings): lunar day on every cell, plus Can Chi for the year, month and day of the selected date
+- **Vietnamese holidays**: 32 solar and lunar holidays with public days off marked; the biggest celebrations (Tết, 30/4, 2/9, Mid-Autumn, …) get animated decorations, which can be turned off
 - **Two languages**: English and Tiếng Việt
 - **Offline and private**: events and settings are plain JSON files on your machine, with no account and no server
 
 | Vietnamese with lunar dates | Settings |
 | --- | --- |
 | ![Vietnamese UI with lunar dates](docs/screenshots/lunar-vi.png) | ![Settings dialog](docs/screenshots/settings.png) |
+| ![Vietnamese UI with lunar dates](docs/screenshots/holidays-effect.png) | ![Settings dialog](docs/screenshots/holidays-effect-2.png) |
 
 ## Download
 
