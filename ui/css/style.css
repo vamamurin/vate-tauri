@@ -487,13 +487,20 @@ body::before {
   gap: 18px;
   background: var(--surface-alt);
   min-height: 0;
+  /* When the selected-day card is tall (lunar details + holidays),
+     scroll the panel instead of squeezing the events list to nothing */
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-dim) transparent;
 }
+
+.side-panel > * { flex-shrink: 0; }
 
 .events-wrapper {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 0;
+  flex: 1 1 auto;
+  min-height: 48px;  /* section title + one line, never squeezed to nothing */
 }
 
 .panel-section-title {
@@ -903,6 +910,177 @@ body::before {
 
 .toggle-switch input:checked + .toggle-track .toggle-thumb {
   transform: translateX(20px);
+}
+
+/* ── HOLIDAYS ───────────────────────────────────── */
+/* One colour set per theme: text, tint, border, icon */
+.hol-tet         { --hol: #c8321f; --hol-bg: rgba(200,50,31,0.07);  --hol-border: rgba(200,50,31,0.24);  --hol-icon: #e0a106; }
+.hol-christmas   { --hol: #2f7d4f; --hol-bg: rgba(47,125,79,0.08);  --hol-border: rgba(47,125,79,0.26);  --hol-icon: #2f7d4f; }
+.hol-midautumn   { --hol: #b8650f; --hol-bg: rgba(217,138,28,0.10); --hol-border: rgba(217,138,28,0.30); --hol-icon: #e08a1e; }
+.hol-national    { --hol: #c8281e; --hol-bg: rgba(200,40,30,0.05);  --hol-border: rgba(200,40,30,0.18);  --hol-icon: #d63a2a; }
+.hol-love        { --hol: #c13d6b; --hol-bg: rgba(214,69,122,0.07); --hol-border: rgba(214,69,122,0.22); --hol-icon: #e05587; }
+.hol-traditional { --hol: #93641a; --hol-bg: rgba(168,116,42,0.08); --hol-border: rgba(168,116,42,0.24); --hol-icon: #c08a2e; }
+.hol-observance  { --hol: #2a6fb5; --hol-bg: rgba(42,122,201,0.06); --hol-border: rgba(42,122,201,0.20); --hol-icon: #2a7ac9; }
+
+/* Calendar cell */
+.day-cell.holiday:not(.today):not(.selected) {
+  background: var(--hol-bg);
+  border-color: var(--hol-border);
+}
+
+/* Tết and Christmas get a two-tone tint */
+.day-cell.hol-tet:not(.today):not(.selected) {
+  background: linear-gradient(155deg, rgba(224,161,6,0.13) 0%, rgba(200,50,31,0.08) 70%);
+}
+.day-cell.hol-christmas:not(.today):not(.selected) {
+  background: linear-gradient(155deg, rgba(47,125,79,0.10) 0%, rgba(200,50,31,0.06) 80%);
+}
+
+.day-cell.holiday:not(.today):not(.selected) .day-num { color: var(--hol); }
+.day-cell.hol-off:not(.today) .day-num { font-weight: 700; }
+
+.hol-icon {
+  position: absolute;
+  right: 7px; bottom: 6px;
+  width: 13px; height: 13px;
+  color: var(--hol-icon);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hol-icon svg,
+.hol-chip-icon svg { width: 100%; height: 100%; display: block; }
+
+/* Selected-day card: holiday chips */
+.sel-holidays {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.sel-holidays:empty { display: none; }
+
+.hol-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 10px;
+  background: var(--hol-bg);
+  border: 1px solid var(--hol-border);
+  animation: slideUp 0.2s ease;
+}
+
+.hol-chip-icon {
+  width: 14px; height: 14px;
+  flex-shrink: 0;
+  color: var(--hol-icon);
+}
+
+.hol-chip-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--hol);
+}
+
+.hol-chip-off {
+  flex-shrink: 0;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: var(--hol);
+  color: #fff;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Selected-day card: animated decoration layer (behind the text) */
+.selected-date-display {
+  position: relative;
+  overflow: hidden;
+}
+
+.selected-date-display > :not(.sel-fx) {
+  position: relative;
+  z-index: 1;
+}
+
+.sel-fx {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.fx-p {
+  position: absolute;
+  left: var(--x);
+  top: -14px;
+  width:  calc(9px * var(--size));
+  height: calc(9px * var(--size));
+  opacity: 0;
+  animation: fxFall var(--dur) linear var(--delay) infinite;
+  will-change: transform, opacity;
+}
+
+/* Tết: apricot (gold) and peach (pink) petals */
+.fx-petals { border-radius: 70% 0 70% 0; }
+.fx-petals.fx-pink { background: #f3a9bb; }
+.fx-petals.fx-gold { background: #f2c14e; }
+
+/* Christmas: snow */
+.fx-snow {
+  width:  calc(6px * var(--size));
+  height: calc(6px * var(--size));
+  border-radius: 50%;
+  background: #c5d8ea;
+}
+
+/* Mid-Autumn: small glowing lanterns rising */
+.fx-lanterns {
+  top: auto;
+  bottom: -16px;
+  width:  calc(8px * var(--size));
+  height: calc(10px * var(--size));
+  border-radius: 45%;
+  background: radial-gradient(circle at 50% 40%, #ffd98a, #e0861e 70%);
+  box-shadow: 0 0 10px rgba(240,160,40,0.55);
+  animation-name: fxRise;
+}
+
+/* Kept faint: decoration sits behind the date text and must not compete with it */
+@keyframes fxFall {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg);                opacity: 0; }
+  12%  { opacity: var(--fx-opacity, 0.5); }
+  50%  { transform: translate3d(var(--sway), 95px, 0) rotate(180deg); }
+  85%  { opacity: var(--fx-opacity, 0.5); }
+  100% { transform: translate3d(0, 200px, 0) rotate(360deg);         opacity: 0; }
+}
+
+@keyframes fxRise {
+  0%   { transform: translate3d(0, 0, 0);                 opacity: 0; }
+  15%  { opacity: var(--fx-opacity, 0.5); }
+  50%  { transform: translate3d(var(--sway), -95px, 0); }
+  85%  { opacity: var(--fx-opacity, 0.5); }
+  100% { transform: translate3d(0, -200px, 0);            opacity: 0; }
+}
+
+.fx-snow     { --fx-opacity: 0.8; }  /* pale colour, can be more opaque */
+.fx-lanterns { --fx-opacity: 0.55; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-p { display: none; }
+}
+
+/* Settings: a row that depends on another toggle */
+.setting-row.is-disabled {
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 /* ── RESPONSIVE ─────────────────────────────────── */
