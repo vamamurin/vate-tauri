@@ -229,8 +229,10 @@ const lunarCalc = (() => {
 // ─────────────────────────────────────────────────────────────
 //  APP STATE
 // ─────────────────────────────────────────────────────────────
-let current  = new Date();
 let today    = new Date();
+// Always the 1st of the displayed month, so setMonth() never overflows
+// (e.g. Jan 31 + 1 month would otherwise become Mar 3)
+let current  = new Date(today.getFullYear(), today.getMonth(), 1);
 let selected = { y: today.getFullYear(), m: today.getMonth(), d: today.getDate() };
 let events   = {};
 let chosenColor = COLORS[0].hex;
@@ -279,9 +281,11 @@ function render() {
   const dict = I18N[settings.lang];
   const y = current.getFullYear(), m = current.getMonth();
 
-  // Month title: italic month name + year
-  document.getElementById('monthTitle').innerHTML =
+  // Month title: italic month name + year (click opens the month/year picker)
+  document.getElementById('monthTitleText').innerHTML =
     `<em>${dict.months[m]}</em> ${y}`;
+  document.getElementById('monthTitle').title = dict.pickMonth;
+  if (isPickerOpen()) renderPicker();
 
   // Day labels
   document.getElementById('dayLabels').innerHTML =
@@ -542,10 +546,161 @@ document.getElementById('nextBtn').addEventListener('click', () => {
   current.setMonth(current.getMonth() + 1); render();
 });
 document.getElementById('todayBtn').addEventListener('click', () => {
-  current  = new Date();
+  current  = new Date(today.getFullYear(), today.getMonth(), 1);
   selected = { y: today.getFullYear(), m: today.getMonth(), d: today.getDate() };
   render();
   renderPanel();
+});
+
+// ─────────────────────────────────────────────────────────────
+//  MONTH / YEAR PICKER
+// ─────────────────────────────────────────────────────────────
+// Range kept where the lunar algorithm is reliable
+const YEAR_MIN = 1900;
+const YEAR_MAX = 2100;
+
+const titleBtn   = document.getElementById('monthTitle');
+const picker     = document.getElementById('monthPicker');
+const yearInput  = document.getElementById('mpYearInput');
+const monthsGrid = document.getElementById('mpMonths');
+const prevYearBtn = document.getElementById('mpPrevYear');
+const nextYearBtn = document.getElementById('mpNextYear');
+let pickerYear   = current.getFullYear();
+
+function isPickerOpen() {
+  return picker.classList.contains('open');
+}
+
+function isValidYear(n) {
+  return Number.isInteger(n) && n >= YEAR_MIN && n <= YEAR_MAX;
+}
+
+// Year row: value, button states, labels
+function renderPickerYear() {
+  const dict = I18N[settings.lang];
+  yearInput.value = pickerYear;
+  yearInput.setAttribute('aria-label', dict.yearLabel);
+  prevYearBtn.title = dict.prevYear;
+  nextYearBtn.title = dict.nextYear;
+  prevYearBtn.disabled = pickerYear <= YEAR_MIN;
+  nextYearBtn.disabled = pickerYear >= YEAR_MAX;
+}
+
+// 12-month grid for pickerYear
+function renderPickerMonths() {
+  const dict = I18N[settings.lang];
+  monthsGrid.innerHTML = dict.monthsShort.map((name, i) => {
+    const cls = ['mp-month'];
+    if (pickerYear === current.getFullYear() && i === current.getMonth()) cls.push('active');
+    if (pickerYear === today.getFullYear()   && i === today.getMonth())   cls.push('is-today');
+    return `<button type="button" class="${cls.join(' ')}" data-m="${i}" aria-label="${dict.months[i]} ${pickerYear}">${name}</button>`;
+  }).join('');
+}
+
+function renderPicker() {
+  picker.setAttribute('aria-label', I18N[settings.lang].pickMonth);
+  renderPickerYear();
+  renderPickerMonths();
+}
+
+function openPicker() {
+  pickerYear = current.getFullYear();
+  renderPicker();
+  picker.classList.add('open');
+  titleBtn.setAttribute('aria-expanded', 'true');
+  yearInput.focus();
+  yearInput.select();
+}
+
+function closePicker(returnFocus = false) {
+  if (!isPickerOpen()) return;
+  picker.classList.remove('open');
+  titleBtn.setAttribute('aria-expanded', 'false');
+  yearInput.classList.remove('invalid');
+  if (returnFocus) titleBtn.focus();
+}
+
+function goToMonth(year, month) {
+  current = new Date(year, month, 1);
+  render();
+  closePicker(true);
+}
+
+function stepPickerYear(delta) {
+  const next = pickerYear + delta;
+  if (!isValidYear(next)) return;
+  pickerYear = next;
+  yearInput.classList.remove('invalid');
+  renderPickerYear();
+  renderPickerMonths();
+}
+
+function flagInvalidYear() {
+  yearInput.classList.remove('invalid');
+  void yearInput.offsetWidth; // restart the shake animation
+  yearInput.classList.add('invalid');
+}
+
+titleBtn.addEventListener('click', () => {
+  isPickerOpen() ? closePicker(true) : openPicker();
+});
+
+prevYearBtn.addEventListener('click', () => stepPickerYear(-1));
+nextYearBtn.addEventListener('click', () => stepPickerYear(+1));
+
+monthsGrid.addEventListener('click', e => {
+  const btn = e.target.closest('.mp-month');
+  if (btn) goToMonth(pickerYear, parseInt(btn.dataset.m));
+});
+
+// Typing a year: digits only; the grid follows as soon as 4 valid digits are in
+yearInput.addEventListener('input', () => {
+  yearInput.value = yearInput.value.replace(/\D/g, '').slice(0, 4);
+  yearInput.classList.remove('invalid');
+  const n = parseInt(yearInput.value, 10);
+  if (yearInput.value.length === 4 && isValidYear(n)) {
+    pickerYear = n;
+    prevYearBtn.disabled = pickerYear <= YEAR_MIN;
+    nextYearBtn.disabled = pickerYear >= YEAR_MAX;
+    renderPickerMonths();
+  }
+});
+
+yearInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const n = parseInt(yearInput.value, 10);
+    // Enter jumps to the same month in the typed year
+    if (isValidYear(n)) goToMonth(n, current.getMonth());
+    else flagInvalidYear();
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    stepPickerYear(+1);
+    yearInput.select();
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    stepPickerYear(-1);
+    yearInput.select();
+  }
+});
+
+// Leaving the field with an unfinished/invalid year restores the last valid one
+yearInput.addEventListener('blur', () => {
+  if (parseInt(yearInput.value, 10) !== pickerYear) {
+    yearInput.value = pickerYear;
+    yearInput.classList.remove('invalid');
+  }
+});
+
+// Close on Escape or on a click outside the picker
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && isPickerOpen()) closePicker(true);
+});
+
+document.addEventListener('mousedown', e => {
+  if (isPickerOpen() && !picker.contains(e.target) && !titleBtn.contains(e.target)) {
+    closePicker();
+  }
 });
 
 // ─────────────────────────────────────────────────────────────

@@ -7,7 +7,14 @@ const I18N = {
     daysLong:    ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
     months:      ['January','February','March','April','May','June',
                   'July','August','September','October','November','December'],
+    monthsShort: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
     lunarMonths: ['1','2','3','4','5','6','7','8','9','10','11','12'],
+
+    // Month / year picker
+    pickMonth:        'Choose month and year',
+    prevYear:         'Previous year',
+    nextYear:         'Next year',
+    yearLabel:        'Year',
 
     // UI strings
     events:           'events',
@@ -35,7 +42,14 @@ const I18N = {
     daysLong:    ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'],
     months:      ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6',
                   'Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'],
+    monthsShort: ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6',
+                  'Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'],
     lunarMonths: ['1','2','3','4','5','6','7','8','9','10','11','12'],
+
+    pickMonth:        'Chọn tháng và năm',
+    prevYear:         'Năm trước',
+    nextYear:         'Năm sau',
+    yearLabel:        'Năm',
 
     events:           'sự kiện',
     selectedDay:      'Ngày Đang Chọn',

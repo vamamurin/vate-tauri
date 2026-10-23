@@ -21,8 +21,23 @@
 
             <div class="month-nav">
                 <button class="nav-btn" id="prevBtn">&#8592;</button>
-                <div class="month-title" id="monthTitle" data-tauri-drag-region></div>
+                <button class="month-title" id="monthTitle" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="monthPicker">
+                    <span id="monthTitleText"></span>
+                    <svg class="month-title-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
                 <button class="nav-btn" id="nextBtn">&#8594;</button>
+
+                <!-- Month / Year Picker -->
+                <div class="month-picker" id="monthPicker" role="dialog" aria-modal="false">
+                    <div class="mp-year-row">
+                        <button class="nav-btn mp-year-btn" id="mpPrevYear" type="button">&#8592;</button>
+                        <input class="mp-year-input" id="mpYearInput" type="text" inputmode="numeric" maxlength="4" autocomplete="off" spellcheck="false" />
+                        <button class="nav-btn mp-year-btn" id="mpNextYear" type="button">&#8594;</button>
+                    </div>
+                    <div class="mp-months" id="mpMonths"></div>
+                </div>
             </div>
 
             <div class="header-right">
