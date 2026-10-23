@@ -16,7 +16,7 @@ A minimal, offline desktop calendar with Vietnamese lunar dates, built with [Tau
 | Vietnamese with lunar dates | Settings |
 | --- | --- |
 | ![Vietnamese UI with lunar dates](docs/screenshots/lunar-vi.png) | ![Settings dialog](docs/screenshots/settings.png) |
-| ![Vietnamese UI with lunar dates](docs/screenshots/holidays-effect.png) | ![Settings dialog](docs/screenshots/holidays-effect-2.png) |
+| ![Holidays effect](docs/screenshots/holidays-effect.png) | ![Holidays effect 2](docs/screenshots/holidays-effect-2.png) |
 
 ## Download
 
