@@ -1,6 +1,6 @@
 [package]
 name = "vate"
-version = "1.1.0"
+version = "1.2.0"
 description = "Minimal offline desktop calendar with Vietnamese lunar dates"
 authors = ["vamamurin"]
 license = "MIT"
